@@ -1,6 +1,7 @@
 package settings
 
 import (
+	"errors"
 	"os"
 	"strings"
 )
@@ -129,4 +130,36 @@ func readSecretFromFile(source, value string) (string, error) {
 	}
 
 	return strings.TrimSpace(string(content)), nil
+}
+
+func loadSecretsFromFile(settings *Settings) (err error) {
+	if settings.Password, err = readSecretFromFile(settings.PasswordFile, settings.Password); err != nil {
+		return errors.New("failed to load password from file: " + err.Error())
+	}
+
+	if settings.LoginToken, err = readSecretFromFile(settings.LoginTokenFile, settings.LoginToken); err != nil {
+		return errors.New("failed to load login token from file: " + err.Error())
+	}
+
+	if settings.Notify.Slack.BotAPIToken, err = readSecretFromFile(settings.Notify.Slack.BotAPITokenFile, settings.Notify.Slack.BotAPIToken); err != nil {
+		return errors.New("failed to load slack api token from file: " + err.Error())
+	}
+
+	if settings.Notify.Telegram.BotAPIKey, err = readSecretFromFile(settings.Notify.Telegram.BotAPIKeyFile, settings.Notify.Telegram.BotAPIKey); err != nil {
+		return errors.New("failed to load telegram bot api key from file: " + err.Error())
+	}
+
+	if settings.Notify.Mail.SMTPPassword, err = readSecretFromFile(settings.Notify.Mail.SMTPPasswordFile, settings.Notify.Mail.SMTPPassword); err != nil {
+		return errors.New("failed to load smtp password from file: " + err.Error())
+	}
+
+	if settings.Notify.Discord.BotAPIToken, err = readSecretFromFile(settings.Notify.Discord.BotAPITokenFile, settings.Notify.Discord.BotAPIToken); err != nil {
+		return errors.New("failed to load discord bot api token from file: " + err.Error())
+	}
+
+	if settings.Notify.Pushover.Token, err = readSecretFromFile(settings.Notify.Pushover.TokenFile, settings.Notify.Pushover.Token); err != nil {
+		return errors.New("failed to load pushover token from file: " + err.Error())
+	}
+
+	return nil
 }
