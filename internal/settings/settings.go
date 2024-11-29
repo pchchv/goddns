@@ -41,3 +41,11 @@ type DiscordNotify struct {
 	Channel         string `json:"channel" yaml:"channel"`
 	MsgTemplate     string `json:"message_template" yaml:"message_template"`
 }
+
+type SlackNotify struct {
+	Enabled         bool   `json:"enabled" yaml:"enabled"`
+	BotAPIToken     string `json:"bot_api_token" yaml:"bot_api_token"`
+	BotAPITokenFile string `json:"bot_api_token_file" yaml:"bot_api_token_file"`
+	Channel         string `json:"channel" yaml:"channel"`
+	MsgTemplate     string `json:"message_template" yaml:"message_template"`
+}
