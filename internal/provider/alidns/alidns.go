@@ -1,5 +1,12 @@
 package alidns
 
+import "sync"
+
+var (
+	instance *AliDNS
+	once     sync.Once
+)
+
 type DomainRecord struct {
 	DomainName string
 	RecordID   string `json:"RecordId"`
@@ -30,4 +37,16 @@ type AliDNS struct {
 	AccessKeyID     string
 	AccessKeySecret string
 	IPType          string
+}
+
+// NewAliDNS function creates instance of AliDNS and return.
+func NewAliDNS(key, secret, ipType string) *AliDNS {
+	once.Do(func() {
+		instance = &AliDNS{
+			AccessKeyID:     key,
+			AccessKeySecret: secret,
+			IPType:          ipType,
+		}
+	})
+	return instance
 }
