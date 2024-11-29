@@ -72,3 +72,11 @@ type MailNotify struct {
 	SendFrom         string `json:"send_from" yaml:"send_from"`
 	SendTo           string `json:"send_to" yaml:"send_to"`
 }
+
+type Notify struct {
+	Telegram TelegramNotify `json:"telegram" yaml:"telegram"`
+	Mail     MailNotify     `json:"mail" yaml:"mail"`
+	Slack    SlackNotify    `json:"slack" yaml:"slack"`
+	Discord  DiscordNotify  `json:"discord" yaml:"discord"`
+	Pushover PushoverNotify `json:"pushover" yaml:"pushover"`
+}
