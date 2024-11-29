@@ -80,3 +80,35 @@ type Notify struct {
 	Discord  DiscordNotify  `json:"discord" yaml:"discord"`
 	Pushover PushoverNotify `json:"pushover" yaml:"pushover"`
 }
+
+type Settings struct {
+	Provider       string   `json:"provider" yaml:"provider"`
+	Email          string   `json:"email" yaml:"email"`
+	Password       string   `json:"password" yaml:"password"`
+	PasswordFile   string   `json:"password_file" yaml:"password_file"`
+	LoginToken     string   `json:"login_token" yaml:"login_token"`
+	LoginTokenFile string   `json:"login_token_file" yaml:"login_token_file"`
+	Domains        []Domain `json:"domains" yaml:"domains"`
+	IPUrl          string   `json:"ip_url" yaml:"ip_url"`
+	IPUrls         []string `json:"ip_urls" yaml:"ip_urls"`
+	IPV6Url        string   `json:"ipv6_url" yaml:"ipv6_url"`
+	IPV6Urls       []string `json:"ipv6_urls" yaml:"ipv6_urls"`
+	Interval       int      `json:"interval" yaml:"interval"`
+	UserAgent      string   `json:"user_agent,omitempty" yaml:"user_agent,omitempty"`
+	Socks5Proxy    string   `json:"socks5_proxy" yaml:"socks5_proxy"`
+	Notify         Notify   `json:"notify" yaml:"notify"`
+	Webhook        Webhook  `json:"webhook,omitempty" yaml:"webhook,omitempty"`
+	IPInterface    string   `json:"ip_interface" yaml:"ip_interface"`
+	IPType         string   `json:"ip_type" yaml:"ip_type"`
+	Mikrotik       Mikrotik `json:"mikrotik" yaml:"mikrotik"`
+	Resolver       string   `json:"resolver" yaml:"resolver"`
+	UseProxy       bool     `json:"use_proxy" yaml:"use_proxy"`
+	DebugInfo      bool     `json:"debug_info" yaml:"debug_info"`
+	RunOnce        bool     `json:"run_once" yaml:"run_once"`
+	Proxied        bool     `json:"proxied" yaml:"proxied"`
+	AppKey         string   `json:"app_key" yaml:"app_key"`
+	AppSecret      string   `json:"app_secret" yaml:"app_secret"`
+	ConsumerKey    string   `json:"consumer_key" yaml:"consumer_key"`
+	SkipSSLVerify  bool     `json:"skip_ssl_verify" yaml:"skip_ssl_verify"`
+	WebPanel       WebPanel `json:"web_panel" yaml:"web_panel"`
+}
