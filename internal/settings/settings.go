@@ -61,3 +61,14 @@ type PushoverNotify struct {
 	Priority    int    `json:"priority" yaml:"priority"`
 	HTML        int    `json:"html" yaml:"html"`
 }
+
+type MailNotify struct {
+	Enabled          bool   `json:"enabled" yaml:"enabled"`
+	SMTPServer       string `json:"smtp_server" yaml:"smtp_server"`
+	SMTPUsername     string `json:"smtp_username" yaml:"smtp_username"`
+	SMTPPassword     string `json:"smtp_password" yaml:"smtp_password"`
+	SMTPPasswordFile string `json:"smtp_password_file" yaml:"smtp_password_file"`
+	SMTPPort         int    `json:"smtp_port" yaml:"smtp_port"`
+	SendFrom         string `json:"send_from" yaml:"send_from"`
+	SendTo           string `json:"send_to" yaml:"send_to"`
+}
