@@ -1,6 +1,11 @@
 package alidns
 
-import "sync"
+import (
+	"fmt"
+	"io"
+	"net/http"
+	"sync"
+)
 
 var (
 	instance *AliDNS
@@ -49,4 +54,18 @@ func NewAliDNS(key, secret, ipType string) *AliDNS {
 		}
 	})
 	return instance
+}
+
+func getHTTPBody(url string) ([]byte, error) {
+	resp, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if resp.StatusCode == http.StatusOK {
+		return body, err
+	}
+
+	return nil, fmt.Errorf("status %d, Error:%s", resp.StatusCode, body)
 }
