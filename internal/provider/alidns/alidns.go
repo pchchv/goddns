@@ -17,6 +17,14 @@ type domainRecords struct {
 	Record []DomainRecord
 }
 
+type domainRecordsResp struct {
+	RequestID     string `json:"RequestId"`
+	TotalCount    int
+	PageNumber    int
+	PageSize      int
+	DomainRecords domainRecords
+}
+
 // AliDNS token.
 type AliDNS struct {
 	AccessKeyID     string
