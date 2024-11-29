@@ -17,3 +17,11 @@ type WebPanel struct {
 	Username string `json:"username" yaml:"username"`
 	Password string `json:"password" yaml:"password"`
 }
+
+type Mikrotik struct {
+	Enabled   bool   `json:"enabled" yaml:"enabled"`
+	Addr      string `json:"addr" yaml:"addr"`
+	Username  string `json:"username" yaml:"username"`
+	Password  string `json:"password" yaml:"password"`
+	Interface string `json:"interface" yaml:"interface"`
+}
