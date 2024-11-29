@@ -41,4 +41,8 @@ func main() {
 	if err := settings.LoadSettings(configPath, &config); err != nil {
 		log.Fatal(err)
 	}
+
+	if err := utils.CheckSettings(&config); err != nil {
+		log.Fatal("Invalid settings: ", err.Error())
+	}
 }
