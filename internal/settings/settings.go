@@ -1,5 +1,10 @@
 package settings
 
+import (
+	"os"
+	"strings"
+)
+
 type Domain struct {
 	DomainName string   `json:"domain_name" yaml:"domain_name"`
 	SubDomains []string `json:"sub_domains" yaml:"sub_domains"`
@@ -111,4 +116,17 @@ type Settings struct {
 	ConsumerKey    string   `json:"consumer_key" yaml:"consumer_key"`
 	SkipSSLVerify  bool     `json:"skip_ssl_verify" yaml:"skip_ssl_verify"`
 	WebPanel       WebPanel `json:"web_panel" yaml:"web_panel"`
+}
+
+func readSecretFromFile(source, value string) (string, error) {
+	if source == "" {
+		return value, nil
+	}
+
+	content, err := os.ReadFile(source)
+	if err != nil {
+		return value, err
+	}
+
+	return strings.TrimSpace(string(content)), nil
 }
