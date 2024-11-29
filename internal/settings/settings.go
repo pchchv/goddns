@@ -1,9 +1,20 @@
 package settings
 
 import (
+	"encoding/json"
 	"errors"
+	"log"
 	"os"
+	"path/filepath"
 	"strings"
+
+	"gopkg.in/yaml.v2"
+)
+
+const (
+	extJSON = "json"
+	extYAML = "yaml"
+	extYML  = "yml"
 )
 
 type Domain struct {
@@ -117,6 +128,51 @@ type Settings struct {
 	ConsumerKey    string   `json:"consumer_key" yaml:"consumer_key"`
 	SkipSSLVerify  bool     `json:"skip_ssl_verify" yaml:"skip_ssl_verify"`
 	WebPanel       WebPanel `json:"web_panel" yaml:"web_panel"`
+}
+
+// LoadSettings -- Load settings from config file.
+func LoadSettings(configPath string, settings *Settings) error {
+	// get config file extension
+	fileExt := strings.ToLower(filepath.Ext(configPath))
+	if fileExt == "" {
+		return errors.New("invalid file extension")
+	}
+
+	// get file name without extension
+	fileName := strings.TrimSuffix(filepath.Base(configPath), fileExt)
+	fileExt = fileExt[1:]
+	if fileName == "" {
+		return errors.New("invalid config file name")
+	}
+
+	// LoadSettings from config file
+	content, err := os.ReadFile(configPath)
+	if err != nil {
+		log.Println("Error occurs while reading config file, please make sure config file exists!")
+		return err
+	}
+
+	switch fileExt {
+	case extJSON:
+		if err := json.Unmarshal(content, settings); err != nil {
+			return err
+		}
+	case extYML:
+		fallthrough
+	case extYAML:
+		if err := yaml.Unmarshal(content, settings); err != nil {
+			return err
+		}
+	default:
+		return errors.New("invalid extension for config file:" + fileExt)
+	}
+
+	if settings.Interval == 0 {
+		// set default interval as 5 minutes if interval is 0
+		settings.Interval = 5 * 60
+	}
+
+	return loadSecretsFromFile(settings)
 }
 
 func readSecretFromFile(source, value string) (string, error) {
