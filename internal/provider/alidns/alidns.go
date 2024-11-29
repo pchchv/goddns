@@ -13,6 +13,10 @@ type DomainRecord struct {
 	Locked     bool
 }
 
+type domainRecords struct {
+	Record []DomainRecord
+}
+
 // AliDNS token.
 type AliDNS struct {
 	AccessKeyID     string
