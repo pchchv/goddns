@@ -13,9 +13,8 @@ import (
 const configEnv = "CONFIG"
 
 var (
-	// Version is current version of GoDDNS.
-	Version = "v0.1"
 	config  settings.Settings
+	Version = "v0.1" // current version of GoDDNS
 	optHelp = flag.Bool("h", false, "Show help")
 	optConf = flag.String("c", "./config.json", "Specify a config file")
 )
