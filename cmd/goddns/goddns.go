@@ -2,19 +2,22 @@ package main
 
 import (
 	"flag"
+	"log"
 	"os"
 
 	"github.com/fatih/color"
+	"github.com/pchchv/goddns/internal/settings"
 	"github.com/pchchv/goddns/internal/utils"
 )
 
 const configEnv = "CONFIG"
 
 var (
-	optConf = flag.String("c", "./config.json", "Specify a config file")
-	optHelp = flag.Bool("h", false, "Show help")
 	// Version is current version of GoDDNS.
 	Version = "v0.1"
+	config  settings.Settings
+	optHelp = flag.Bool("h", false, "Show help")
+	optConf = flag.String("c", "./config.json", "Specify a config file")
 )
 
 func main() {
@@ -32,5 +35,10 @@ func main() {
 	if os.Getenv(configEnv) != "" {
 		// overwrite the config path
 		configPath = os.Getenv(configEnv)
+	}
+
+	// Load settings from configs file
+	if err := settings.LoadSettings(configPath, &config); err != nil {
+		log.Fatal(err)
 	}
 }
