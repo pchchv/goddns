@@ -175,6 +175,43 @@ func LoadSettings(configPath string, settings *Settings) error {
 	return loadSecretsFromFile(settings)
 }
 
+func (s *Settings) SaveSettings(configPath string) (err error) {
+	// get config file extension
+	fileExt := strings.ToLower(filepath.Ext(configPath))
+	if fileExt == "" {
+		return errors.New("invalid file extension")
+	}
+
+	// get file name without extension
+	fileName := strings.TrimSuffix(filepath.Base(configPath), fileExt)
+	fileExt = fileExt[1:]
+
+	if fileName == "" {
+		return errors.New("invalid config file name")
+	}
+
+	// loadSettings from config file
+	var content []byte
+	switch fileExt {
+	case extJSON:
+		content, err = json.MarshalIndent(s, "", "  ")
+		if err != nil {
+			return err
+		}
+	case extYML:
+		fallthrough
+	case extYAML:
+		content, err = yaml.Marshal(s)
+		if err != nil {
+			return err
+		}
+	default:
+		return errors.New("invalid extension for config file:" + fileExt)
+	}
+
+	return os.WriteFile(configPath, content, 0644)
+}
+
 func readSecretFromFile(source, value string) (string, error) {
 	if source == "" {
 		return value, nil
