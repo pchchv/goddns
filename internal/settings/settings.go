@@ -49,3 +49,15 @@ type SlackNotify struct {
 	Channel         string `json:"channel" yaml:"channel"`
 	MsgTemplate     string `json:"message_template" yaml:"message_template"`
 }
+
+type PushoverNotify struct {
+	Enabled     bool   `json:"enabled" yaml:"enabled"`
+	Token       string `json:"token" yaml:"token"`
+	TokenFile   string `json:"token_file" yaml:"token:_file"`
+	User        string `json:"user" yaml:"user"`
+	MsgTemplate string `json:"message_template" yaml:"message_template"`
+	Device      string `json:"device" yaml:"device"`
+	Title       string `json:"title" yaml:"title"`
+	Priority    int    `json:"priority" yaml:"priority"`
+	HTML        int    `json:"html" yaml:"html"`
+}
