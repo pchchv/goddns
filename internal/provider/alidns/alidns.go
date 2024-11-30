@@ -4,6 +4,7 @@ import (
 	"crypto/hmac"
 	"crypto/sha1"
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"io"
 	"math/rand"
@@ -14,6 +15,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/pchchv/goddns/internal/utils"
 )
 
 const baseURL = "https://alidns.aliyuncs.com/"
@@ -74,6 +77,35 @@ func NewAliDNS(key, secret, ipType string) *AliDNS {
 		}
 	})
 	return instance
+}
+
+// GetDomainRecords gets all the domain records according to input subdomain key.
+func (d *AliDNS) GetDomainRecords(domain, rr string) []DomainRecord {
+	resp := &domainRecordsResp{}
+	params := map[string]string{
+		"Action":    "DescribeSubDomainRecords",
+		"SubDomain": fmt.Sprintf("%s.%s", rr, domain),
+	}
+
+	if d.IPType == "" || strings.ToUpper(d.IPType) == utils.IPV4 {
+		params["Type"] = utils.IPTypeA
+	} else if strings.ToUpper(d.IPType) == utils.IPV6 {
+		params["Type"] = utils.IPTypeAAAA
+	}
+
+	urlPath := d.genRequestURL(params)
+	body, err := getHTTPBody(urlPath)
+	if err != nil {
+		fmt.Printf("GetDomainRecords error.%+v\n", err)
+	} else {
+		if err := json.Unmarshal(body, resp); err != nil {
+			fmt.Printf("GetDomainRecords error. %+v\n", err)
+			return nil
+		}
+		return resp.DomainRecords.Record
+	}
+
+	return nil
 }
 
 func (d *AliDNS) genRequestURL(params map[string]string) string {
