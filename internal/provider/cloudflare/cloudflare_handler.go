@@ -10,3 +10,8 @@ type DNSRecord struct {
 	ZoneID  string `json:"zone_id"`
 	TTL     int32  `json:"ttl"`
 }
+
+// SetIP updates DNSRecord.IP.
+func (r *DNSRecord) SetIP(ip string) {
+	r.IP = ip
+}
