@@ -3,6 +3,8 @@ package alidns
 import (
 	"fmt"
 	"log"
+
+	"github.com/pchchv/goddns/internal/settings"
 )
 
 type DNSProvider struct {
@@ -28,4 +30,11 @@ func (provider *DNSProvider) UpdateIP(domainName, subdomainName, ip string) erro
 	}
 
 	return nil
+}
+
+func (provider *DNSProvider) Init(conf *settings.Settings) {
+	provider.aliDNS = NewAliDNS(
+		conf.Email,
+		conf.Password,
+		conf.IPType)
 }
