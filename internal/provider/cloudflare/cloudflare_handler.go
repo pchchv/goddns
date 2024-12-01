@@ -6,6 +6,12 @@ type Zone struct {
 	Name string `json:"name"`
 }
 
+// ZoneResponse is a wrapper for Zones.
+type ZoneResponse struct {
+	Zones   []Zone `json:"result"`
+	Success bool   `json:"success"`
+}
+
 // DNSRecord for Cloudflare API.
 type DNSRecord struct {
 	ID      string `json:"id"`
