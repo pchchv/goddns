@@ -1,5 +1,7 @@
 package cloudflare
 
+import "github.com/pchchv/goddns/internal/settings"
+
 // Zone object with id and name.
 type Zone struct {
 	ID   string `json:"id"`
@@ -36,4 +38,9 @@ type DNSRecordUpdateResponse struct {
 type DNSRecordResponse struct {
 	Records []DNSRecord `json:"result"`
 	Success bool        `json:"success"`
+}
+
+type DNSProvider struct {
+	configuration *settings.Settings
+	API           string
 }
