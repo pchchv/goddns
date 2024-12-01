@@ -63,7 +63,7 @@ func (provider *DNSProvider) Init(conf *settings.Settings) {
 	provider.API = URL
 }
 
-// Create a new request with auth in place and optional proxy.
+// newRequest creates a new request with auth in place and optional proxy.
 func (provider *DNSProvider) newRequest(method, url string, body io.Reader) (*http.Request, *http.Client) {
 	client := utils.GetHTTPClient(provider.configuration)
 	if client == nil {
@@ -83,7 +83,7 @@ func (provider *DNSProvider) newRequest(method, url string, body io.Reader) (*ht
 	return req, client
 }
 
-// Find the correct zone via domain name.
+// getZone find the correct zone via domain name.
 func (provider *DNSProvider) getZone(domain string) string {
 	var z ZoneResponse
 
