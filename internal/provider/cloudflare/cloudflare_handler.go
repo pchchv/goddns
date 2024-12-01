@@ -252,3 +252,17 @@ func (provider *DNSProvider) updateRecord(record DNSRecord, newIP string) string
 
 	return lastIP
 }
+
+// recordTracked checks if record is present in domain conf.
+func recordTracked(domain *settings.Domain, record *DNSRecord) bool {
+	for _, subDomain := range domain.SubDomains {
+		sd := fmt.Sprintf("%s.%s", subDomain, domain.DomainName)
+		if record.Name == sd {
+			return true
+		} else if subDomain == utils.RootDomain && record.Name == domain.DomainName {
+			return true
+		}
+	}
+
+	return false
+}
