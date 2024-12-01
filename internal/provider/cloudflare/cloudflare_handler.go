@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/pchchv/goddns/internal/settings"
 	"github.com/pchchv/goddns/internal/utils"
@@ -111,4 +112,49 @@ func (provider *DNSProvider) getZone(domain string) string {
 	}
 
 	return ""
+}
+
+func (provider *DNSProvider) getCurrentDomain(domainName string) *settings.Domain {
+	for _, domain := range provider.configuration.Domains {
+		domain := domain
+		if domain.DomainName == domainName {
+			return &domain
+		}
+	}
+
+	return nil
+}
+
+// Get all DNS A records for a zone.
+func (provider *DNSProvider) getDNSRecords(zoneID string) []DNSRecord {
+	var empty []DNSRecord
+	var recordType string
+	var r DNSRecordResponse
+	if provider.configuration.IPType == "" || strings.ToUpper(provider.configuration.IPType) == utils.IPV4 {
+		recordType = utils.IPTypeA
+	} else if strings.ToUpper(provider.configuration.IPType) == utils.IPV6 {
+		recordType = utils.IPTypeAAAA
+	}
+
+	log.Printf("Querying records with type: %s", recordType)
+	req, client := provider.newRequest("GET", fmt.Sprintf("/zones/"+zoneID+"/dns_records?type=%s&page=1&per_page=500", recordType), nil)
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatal("Request error:", err)
+		return empty
+	}
+
+	body, _ := io.ReadAll(resp.Body)
+	if err = json.Unmarshal(body, &r); err != nil {
+		log.Printf("Decoder error: %+v", err)
+		log.Printf("Response body: %+v", string(body))
+		return empty
+	} else if !r.Success {
+		body, _ := io.ReadAll(resp.Body)
+		log.Printf("Response failed: %+v", string(body))
+		return empty
+
+	}
+
+	return r.Records
 }
