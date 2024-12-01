@@ -1,5 +1,11 @@
 package cloudflare
 
+// Zone object with id and name.
+type Zone struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}
+
 // DNSRecord for Cloudflare API.
 type DNSRecord struct {
 	ID      string `json:"id"`
