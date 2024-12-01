@@ -27,3 +27,8 @@ type DNSRecord struct {
 func (r *DNSRecord) SetIP(ip string) {
 	r.IP = ip
 }
+
+type DNSRecordUpdateResponse struct {
+	Record  DNSRecord `json:"result"`
+	Success bool      `json:"success"`
+}
