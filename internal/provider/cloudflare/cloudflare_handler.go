@@ -32,3 +32,8 @@ type DNSRecordUpdateResponse struct {
 	Record  DNSRecord `json:"result"`
 	Success bool      `json:"success"`
 }
+
+type DNSRecordResponse struct {
+	Records []DNSRecord `json:"result"`
+	Success bool        `json:"success"`
+}
