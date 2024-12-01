@@ -25,6 +25,7 @@ const (
 	OVH            = "OVH"
 	SCALEWAY       = "Scaleway"
 	STRATO         = "Strato"
+	RootDomain     = "@"
 )
 
 // Version is current version of GoDNS.

@@ -1,6 +1,7 @@
 package cloudflare
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -125,7 +126,7 @@ func (provider *DNSProvider) getCurrentDomain(domainName string) *settings.Domai
 	return nil
 }
 
-// Get all DNS A records for a zone.
+// getDNSRecords gets all DNS A records for a zone.
 func (provider *DNSProvider) getDNSRecords(zoneID string) []DNSRecord {
 	var empty []DNSRecord
 	var recordType string
@@ -157,4 +158,97 @@ func (provider *DNSProvider) getDNSRecords(zoneID string) []DNSRecord {
 	}
 
 	return r.Records
+}
+
+func (provider *DNSProvider) createRecord(zoneID, domain, subDomain, ip string) error {
+	var recordType string
+	if provider.configuration.IPType == "" || strings.ToUpper(provider.configuration.IPType) == utils.IPV4 {
+		recordType = utils.IPTypeA
+	} else if strings.ToUpper(provider.configuration.IPType) == utils.IPV6 {
+		recordType = utils.IPTypeAAAA
+	}
+
+	newRecord := DNSRecord{
+		Type: recordType,
+		IP:   ip,
+		TTL:  1,
+	}
+
+	if provider.configuration.Proxied {
+		newRecord.Proxied = true
+	}
+
+	if subDomain == utils.RootDomain {
+		newRecord.Name = utils.RootDomain
+	} else {
+		newRecord.Name = fmt.Sprintf("%s.%s", subDomain, domain)
+	}
+
+	content, err := json.Marshal(newRecord)
+	if err != nil {
+		log.Fatalf("Encoder error: %+v", err)
+		return err
+	}
+
+	req, client := provider.newRequest("POST", fmt.Sprintf("/zones/%s/dns_records", zoneID), bytes.NewBuffer(content))
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatal("Request error:", err)
+		return err
+	}
+
+	defer resp.Body.Close()
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalf("Failed to read request body: %+v", err)
+		return err
+	}
+
+	var r DNSRecordUpdateResponse
+	if err = json.Unmarshal(body, &r); err != nil {
+		log.Fatalf("Decoder error: %+v", err)
+		return err
+	} else if !r.Success {
+		log.Printf("Response failed: %+v", string(body))
+		return fmt.Errorf("failed to create record: %+v", string(body))
+	}
+
+	return nil
+}
+
+// updateRecord updates DNS A Record with new IP.
+func (provider *DNSProvider) updateRecord(record DNSRecord, newIP string) string {
+	var r DNSRecordUpdateResponse
+	var lastIP string
+	record.SetIP(newIP)
+	j, _ := json.Marshal(record)
+	req, client := provider.newRequest("PUT",
+		"/zones/"+record.ZoneID+"/dns_records/"+record.ID,
+		bytes.NewBuffer(j),
+	)
+
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatal("Request error:", err)
+		return ""
+	}
+
+	defer resp.Body.Close()
+	body, _ := io.ReadAll(resp.Body)
+	err = json.Unmarshal(body, &r)
+	if err != nil {
+		log.Fatalf("Decoder error: %+v", err)
+		log.Printf("Response body: %+v", string(body))
+		return ""
+	}
+
+	if !r.Success {
+		body, _ := io.ReadAll(resp.Body)
+		log.Printf("Response failed: %+v", string(body))
+	} else {
+		log.Printf("Record updated: %+v - %+v", record.Name, record.IP)
+		lastIP = record.IP
+	}
+
+	return lastIP
 }
