@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
+
+	"github.com/pchchv/goddns/internal/settings"
 )
 
 func TestResponseToJSON(t *testing.T) {
@@ -124,5 +126,48 @@ func TestDNSUpdateResponseToJSON(t *testing.T) {
 
 	if resp.Record.Name != "example.com" {
 		t.Errorf("Name Error: %#v != example.com", resp.Record.Name)
+	}
+}
+
+func TestRecordTracked(t *testing.T) {
+	s := strings.NewReader(`
+    {
+        "errors": [],
+        "messages": [],
+        "result": [
+            {
+                "content": "127.0.0.1",
+                "id": "F11cc63e02a42d38174b8e7c548a7b6f",
+                "name": "example.com",
+                "type": "A",
+                "zone_id": "mk2b6fa491c12445a4376666a32429e1",
+                "zone_name": "example.com"
+            },
+            {
+                "content": "127.0.0.1",
+                "id": "G00cc63e02a42d38174b8e7c548a7b6f",
+                "name": "www.example.com",
+                "type": "A",
+                "zone_id": "mk2b6fa491c12445a4376666a32429e1",
+                "zone_name": "www.example.com"
+            }
+        ],
+        "success": true
+    }`)
+
+	var resp DNSRecordResponse
+	if err := json.NewDecoder(s).Decode(&resp); err != nil {
+		t.Error(err.Error())
+	}
+
+	domain := &settings.Domain{
+		DomainName: "example.com",
+		SubDomains: []string{"www"},
+	}
+
+	for _, rec := range resp.Records {
+		if recordTracked(domain, &rec) {
+			t.Logf("Record founded: %+v", rec.Name)
+		}
 	}
 }
