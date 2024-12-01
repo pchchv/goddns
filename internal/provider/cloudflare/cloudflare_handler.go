@@ -65,6 +65,47 @@ func (provider *DNSProvider) Init(conf *settings.Settings) {
 	provider.API = URL
 }
 
+func (provider *DNSProvider) UpdateIP(domainName, subdomainName, ip string) error {
+	log.Printf("Checking IP for domain %s", domainName)
+	zoneID := provider.getZone(domainName)
+	if zoneID != "" {
+		records := provider.getDNSRecords(zoneID)
+		matched := false
+		// update records
+		for _, rec := range records {
+			rec := rec
+			if !recordTracked(provider.getCurrentDomain(domainName), &rec) {
+				log.Println("Skipping record:", rec.Name)
+				continue
+			}
+
+			if strings.Contains(rec.Name, subdomainName) || rec.Name == domainName {
+				if rec.IP != ip {
+					log.Printf("IP mismatch: Current(%+v) vs Cloudflare(%+v)", ip, rec.IP)
+					provider.updateRecord(rec, ip)
+				} else {
+					log.Printf("Record OK: %+v - %+v", rec.Name, rec.IP)
+				}
+
+				matched = true
+			}
+		}
+
+		if !matched {
+			log.Printf("Record %s not found, will create it.", subdomainName)
+			if err := provider.createRecord(zoneID, domainName, subdomainName, ip); err != nil {
+				return err
+			}
+			log.Printf("Record [%s] created with IP address: %s", subdomainName, ip)
+		}
+	} else {
+		log.Fatalf("Failed to find zone for domain: %s", domainName)
+		return fmt.Errorf("failed to find zone for domain: %s", domainName)
+	}
+
+	return nil
+}
+
 // newRequest creates a new request with auth in place and optional proxy.
 func (provider *DNSProvider) newRequest(method, url string, body io.Reader) (*http.Request, *http.Client) {
 	client := utils.GetHTTPClient(provider.configuration)
