@@ -140,3 +140,47 @@ func (provider *DNSProvider) updateRecord(domainName string, record DNSRecord, n
 	log.Printf("Record updated: %+v - %+v", record.Name, record.IP)
 	return record.IP
 }
+
+func (provider *DNSProvider) createRecord(domain, subDomain, ip string) error {
+	recordType := provider.getRecordType()
+	newRecord := DNSRecord{
+		Type: recordType,
+		IP:   ip,
+		TTL:  int32(provider.configuration.Interval),
+	}
+
+	if subDomain == utils.RootDomain {
+		newRecord.Name = utils.RootDomain
+	} else {
+		newRecord.Name = subDomain
+	}
+
+	content, err := json.Marshal(newRecord)
+	if err != nil {
+		log.Fatalf("Encoder error: %+v", err)
+		return err
+	}
+
+	req, client := provider.newRequest("POST", fmt.Sprintf("/domains/%s/records", domain), bytes.NewBuffer(content))
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatal("Request error:", err)
+		return err
+	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalf("Failed to read request body: %+v", err)
+		return err
+	}
+
+	var r DNSRecord
+	if err = json.Unmarshal(body, &r); err != nil {
+		log.Fatalf("Response decoder error: %+v", err)
+		log.Printf("Response body: %+v", string(body))
+		return err
+	}
+
+	return nil
+}
