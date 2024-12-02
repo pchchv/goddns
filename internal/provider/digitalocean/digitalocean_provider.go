@@ -14,6 +14,11 @@ type DNSRecord struct {
 	TTL  int32  `json:"ttl"`
 }
 
+// SetIP updates DNSRecord.IP.
+func (r *DNSRecord) SetIP(ip string) {
+	r.IP = ip
+}
+
 type DNSProvider struct {
 	configuration *settings.Settings
 	API           string
