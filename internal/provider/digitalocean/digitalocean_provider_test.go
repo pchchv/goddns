@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"strings"
 	"testing"
+
+	"github.com/pchchv/goddns/internal/settings"
 )
 
 func TestDNSResponseToJSON(t *testing.T) {
@@ -69,5 +71,74 @@ func TestDNSUpdateResponseToJSON(t *testing.T) {
 
 	if resp.Name != "@" {
 		t.Errorf("Name Error: %#v != @", resp.Name)
+	}
+}
+
+func TestRecordTracked(t *testing.T) {
+	s := strings.NewReader(`
+    {
+        "domain_records": [
+            {
+                "id": 12345678,
+                "type": "A",
+                "name": "@",
+                "data": "127.0.0.1",
+                "priority": null,
+                "port": null,
+                "ttl": 3600,
+                "weight": null,
+                "flags": null,
+                "tag": null
+            },
+            {
+                "id": 12345678,
+                "type": "A",
+                "name": "swordfish",
+                "data": "127.0.0.1",
+                "priority": null,
+                "port": null,
+                "ttl": 3600,
+                "weight": null,
+                "flags": null,
+                "tag": null
+            },
+            {
+                "id": 12345678,
+                "type": "A",
+                "name": "www",
+                "data": "127.0.0.1",
+                "priority": null,
+                "port": null,
+                "ttl": 3600,
+                "weight": null,
+                "flags": null,
+                "tag": null
+            }
+        ],
+        "links": {},
+        "meta": {
+            "total": 3
+        }
+    }`)
+
+	var resp DomainRecordsResponse
+	if err := json.NewDecoder(s).Decode(&resp); err != nil {
+		t.Error(err.Error())
+	}
+
+	var matchedDomains int
+	domain := &settings.Domain{
+		DomainName: "example.com",
+		SubDomains: []string{"www", "@"},
+	}
+	for _, rec := range resp.Records {
+		if recordTracked(domain, &rec) {
+			t.Logf("Record founded: %+v", rec.Name)
+			matchedDomains++
+		}
+	}
+
+	if matchedDomains != 2 {
+		t.Errorf("Unexpected amount of domains matched: %#v != 2", matchedDomains)
 	}
 }
