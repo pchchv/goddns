@@ -109,6 +109,35 @@ func (d *AliDNS) GetDomainRecords(domain, rr string) []DomainRecord {
 	return nil
 }
 
+// UpdateDomainRecord updates domain record.
+func (d *AliDNS) UpdateDomainRecord(r DomainRecord) (err error) {
+	params := map[string]string{
+		"Action":   "UpdateDomainRecord",
+		"RecordId": r.RecordID,
+		"RR":       r.RR,
+		"Value":    r.Value,
+		"TTL":      strconv.Itoa(r.TTL),
+		"Line":     r.Line,
+	}
+
+	if d.IPType == "" || strings.ToUpper(d.IPType) == utils.IPV4 {
+		params["Type"] = utils.IPTypeA
+	} else if strings.ToUpper(d.IPType) == utils.IPV6 {
+		params["Type"] = utils.IPTypeAAAA
+	}
+
+	urlPath := d.genRequestURL(params)
+	if urlPath == "" {
+		return errors.New("failed to generate request URL")
+	}
+
+	if _, err = getHTTPBody(urlPath); err != nil {
+		fmt.Printf("UpdateDomainRecord error.%+v\n", err)
+	}
+
+	return err
+}
+
 func (d *AliDNS) genRequestURL(params map[string]string) string {
 	var pArr []string
 	ps := map[string]string{}
