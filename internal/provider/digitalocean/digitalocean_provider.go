@@ -1,10 +1,12 @@
 package digitalocean
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/pchchv/goddns/internal/settings"
 	"github.com/pchchv/goddns/internal/utils"
@@ -62,4 +64,39 @@ func (provider *DNSProvider) newRequest(method, url string, body io.Reader) (*ht
 	log.Printf("Created %+v request for %+v", string(method), string(url))
 
 	return req, client
+}
+
+func (provider *DNSProvider) getRecordType() string {
+	var recordType string = utils.IPTypeA
+	if provider.configuration.IPType == "" || strings.ToUpper(provider.configuration.IPType) == utils.IPV4 {
+		recordType = utils.IPTypeA
+	} else if strings.ToUpper(provider.configuration.IPType) == utils.IPV6 {
+		recordType = utils.IPTypeAAAA
+	}
+
+	return recordType
+}
+
+// getDNSRecords gets all DNS A(AAA) records for a zone.
+func (provider *DNSProvider) getDNSRecords(domainName string) []DNSRecord {
+	var empty []DNSRecord
+	var r DomainRecordsResponse
+	recordType := provider.getRecordType()
+
+	log.Printf("Querying records with type: %s", recordType)
+	req, client := provider.newRequest("GET", fmt.Sprintf("/domains/"+domainName+"/records?type=%s&page=1&per_page=200", recordType), nil)
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatal("Request error:", err)
+		return empty
+	}
+
+	body, _ := io.ReadAll(resp.Body)
+	if err = json.Unmarshal(body, &r); err != nil {
+		log.Printf("Decoder error: %+v", err)
+		log.Printf("Response body: %+v", string(body))
+		return empty
+	}
+
+	return r.Records
 }
