@@ -115,3 +115,53 @@ func (provider *DNSProvider) updateIP(domainID int64, subDomainID string, subDom
 
 	return nil
 }
+
+// getSubDomain returns subdomain by domain id.
+func (provider *DNSProvider) getSubDomain(domainID int64, name string) (string, string) {
+	var ret, ip string
+	value := url.Values{}
+	value.Add("domain_id", strconv.FormatInt(domainID, 10))
+	value.Add("offset", "0")
+	value.Add("length", "1")
+	value.Add("sub_domain", name)
+	if provider.configuration.IPType == "" || strings.ToUpper(provider.configuration.IPType) == utils.IPV4 {
+		value.Add("record_type", "A")
+	} else if strings.ToUpper(provider.configuration.IPType) == utils.IPV6 {
+		value.Add("record_type", "AAAA")
+	} else {
+		log.Fatal("Error: must specify \"ip_type\" in config for DNSPod.")
+		return "", ""
+	}
+
+	response, err := provider.postData("/Record.List", value)
+	if err != nil {
+		log.Fatal("Failed to get domain list:", err)
+		return "", ""
+	}
+
+	sjson, parseErr := simplejson.NewJson([]byte(response))
+	if parseErr != nil {
+		log.Fatal(parseErr)
+		return "", ""
+	}
+
+	if sjson.Get("status").Get("code").MustString() == "1" {
+		records, _ := sjson.Get("records").Array()
+		for _, d := range records {
+			m := d.(map[string]interface{})
+			if m["name"] == name {
+				ret = m["id"].(string)
+				ip = m["value"].(string)
+				break
+			}
+		}
+
+		if len(records) == 0 {
+			log.Print("records slice is empty.")
+		}
+	} else {
+		log.Printf("get_subdomain:status code: %s", sjson.Get("status").Get("code").MustString())
+	}
+
+	return ret, ip
+}
