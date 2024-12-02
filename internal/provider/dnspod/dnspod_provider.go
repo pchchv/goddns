@@ -1,6 +1,7 @@
 package dnspod
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -164,4 +165,46 @@ func (provider *DNSProvider) getSubDomain(domainID int64, name string) (string, 
 	}
 
 	return ret, ip
+}
+
+// getDomain returns specific domain by name.
+func (provider *DNSProvider) getDomain(name string) (ret int64) {
+	values := url.Values{}
+	values.Add("type", "all")
+	values.Add("offset", "0")
+	values.Add("length", "20")
+	response, err := provider.postData("/Domain.List", values)
+	if err != nil {
+		log.Fatal("Failed to get domain list:", err)
+		return -1
+	}
+
+	sjson, parseErr := simplejson.NewJson([]byte(response))
+	if parseErr != nil {
+		log.Fatal(parseErr)
+		return -1
+	}
+
+	if sjson.Get("status").Get("code").MustString() == "1" {
+		domains, _ := sjson.Get("domains").Array()
+		for _, d := range domains {
+			m := d.(map[string]interface{})
+			if m["name"] == name {
+				id := m["id"]
+				switch t := id.(type) {
+				case json.Number:
+					ret, _ = t.Int64()
+				}
+				break
+			}
+		}
+
+		if len(domains) == 0 {
+			log.Print("domains slice is empty.")
+		}
+	} else {
+		log.Printf("get_domain:status code: %s", sjson.Get("status").Get("code").MustString())
+	}
+
+	return
 }
