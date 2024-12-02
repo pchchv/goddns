@@ -42,3 +42,32 @@ func TestDNSResponseToJSON(t *testing.T) {
 		t.Errorf("Name Error: %#v != potato", resp.Records[0].Name)
 	}
 }
+
+func TestDNSUpdateResponseToJSON(t *testing.T) {
+	s := strings.NewReader(`
+    {
+        "id": 12345678,
+        "type": "A",
+        "name": "@",
+        "data": "127.0.0.1",
+        "priority": null,
+        "port": null,
+        "ttl": 3600,
+        "weight": null,
+        "flags": null,
+        "tag": null
+    }`)
+
+	var resp DNSRecord
+	if err := json.NewDecoder(s).Decode(&resp); err != nil {
+		t.Error(err.Error())
+	}
+
+	if resp.ID != 12345678 {
+		t.Errorf("ID Error: %#v != 12345678 ", resp.ID)
+	}
+
+	if resp.Name != "@" {
+		t.Errorf("Name Error: %#v != @", resp.Name)
+	}
+}
