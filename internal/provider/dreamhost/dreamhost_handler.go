@@ -83,3 +83,12 @@ func (provider *DNSProvider) updateDNS(dns, ip, hostname, action string) error {
 	log.Printf("Update IP success: %s", string(body))
 	return nil
 }
+
+// updateIP update subdomain with current IP.
+func (provider *DNSProvider) updateIP(hostname, currentIP, lastIP string) error {
+	if err := provider.updateDNS(lastIP, currentIP, hostname, "remove"); err != nil {
+		return err
+	}
+
+	return provider.updateDNS(lastIP, currentIP, hostname, "add")
+}
