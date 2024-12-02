@@ -19,6 +19,10 @@ func (r *DNSRecord) SetIP(ip string) {
 	r.IP = ip
 }
 
+type DomainRecordsResponse struct {
+	Records []DNSRecord `json:"domain_records"`
+}
+
 type DNSProvider struct {
 	configuration *settings.Settings
 	API           string
