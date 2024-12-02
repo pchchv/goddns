@@ -1,6 +1,14 @@
 package digitalocean
 
-import "github.com/pchchv/goddns/internal/settings"
+import (
+	"fmt"
+	"io"
+	"log"
+	"net/http"
+
+	"github.com/pchchv/goddns/internal/settings"
+	"github.com/pchchv/goddns/internal/utils"
+)
 
 // URL is the endpoint for the DigitalOcean API.
 const URL = "https://api.digitalocean.com/v2"
@@ -32,4 +40,26 @@ type DNSProvider struct {
 func (provider *DNSProvider) Init(conf *settings.Settings) {
 	provider.configuration = conf
 	provider.API = URL
+}
+
+// newRequest creates a new request with auth in place and optional proxy.
+func (provider *DNSProvider) newRequest(method, url string, body io.Reader) (*http.Request, *http.Client) {
+	client := utils.GetHTTPClient(provider.configuration)
+	if client == nil {
+		log.Print("cannot create HTTP client")
+	}
+
+	req, _ := http.NewRequest(method, provider.API+url, body)
+	req.Header.Set("Content-Type", "application/json")
+
+	if provider.configuration.Email != "" && provider.configuration.Password != "" {
+		req.Header.Set("X-Auth-Email", provider.configuration.Email)
+		req.Header.Set("X-Auth-Key", provider.configuration.Password)
+	} else if provider.configuration.LoginToken != "" {
+		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", provider.configuration.LoginToken))
+	}
+
+	log.Printf("Created %+v request for %+v", string(method), string(url))
+
+	return req, client
 }
