@@ -26,6 +26,21 @@ func (provider *DNSProvider) Init(conf *settings.Settings) {
 	provider.configuration = conf
 }
 
+func (provider *DNSProvider) UpdateIP(domainName, subdomainName, ip string) error {
+	domainID := provider.getDomain(domainName)
+	if domainID == -1 {
+		return errors.New("domain ID not found")
+	}
+
+	subdomainID, currentIP := provider.getSubDomain(domainID, subdomainName)
+	if subdomainID == "" || currentIP == "" {
+		return fmt.Errorf("domain or subdomain not configured yet. domain: %s.%s subDomainID: %s ip: %s", subdomainName, domainName, subdomainID, ip)
+	}
+
+	log.Printf("%s.%s Start to update record IP...", subdomainName, domainName)
+	return provider.updateIP(domainID, subdomainID, subdomainName, ip)
+}
+
 // generateHeader generates the request header for DNSPod API.
 func (provider *DNSProvider) generateHeader(content url.Values) url.Values {
 	header := url.Values{}
