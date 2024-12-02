@@ -184,3 +184,14 @@ func (provider *DNSProvider) createRecord(domain, subDomain, ip string) error {
 
 	return nil
 }
+
+// recordTracked checks if record is present in domain conf.
+func recordTracked(domain *settings.Domain, record *DNSRecord) bool {
+	for _, subDomain := range domain.SubDomains {
+		if record.Name == subDomain {
+			return true
+		}
+	}
+
+	return false
+}
