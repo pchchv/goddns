@@ -1,6 +1,7 @@
 package digitalocean
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -99,4 +100,43 @@ func (provider *DNSProvider) getDNSRecords(domainName string) []DNSRecord {
 	}
 
 	return r.Records
+}
+
+func (provider *DNSProvider) getCurrentDomain(domainName string) *settings.Domain {
+	for _, domain := range provider.configuration.Domains {
+		domain := domain
+		if domain.DomainName == domainName {
+			return &domain
+		}
+	}
+
+	return nil
+}
+
+// updateRecord updates DNS Record with new IP.
+func (provider *DNSProvider) updateRecord(domainName string, record DNSRecord, newIP string) string {
+	record.SetIP(newIP)
+	j, _ := json.Marshal(record)
+	req, client := provider.newRequest("PUT",
+		fmt.Sprintf("/domains/%s/records/%d", domainName, record.ID),
+		bytes.NewBuffer(j),
+	)
+
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Fatal("Request error:", err)
+		return ""
+	}
+	defer resp.Body.Close()
+
+	var r DNSRecord
+	body, _ := io.ReadAll(resp.Body)
+	if err = json.Unmarshal(body, &r); err != nil {
+		log.Fatalf("Decoder error: %+v", err)
+		log.Printf("Response body: %+v", string(body))
+		return ""
+	}
+
+	log.Printf("Record updated: %+v - %+v", record.Name, record.IP)
+	return record.IP
 }
