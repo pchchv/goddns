@@ -21,6 +21,10 @@ func (provider *DNSProvider) Init(conf *settings.Settings) {
 	provider.configuration = conf
 }
 
+func (provider *DNSProvider) UpdateIP(domainName, subdomainName, ip string) error {
+	return provider.updateIP(domainName, subdomainName, ip)
+}
+
 func (provider *DNSProvider) updateIP(domainName, subdomainName, currentIP string) error {
 	var ip string
 	if strings.ToUpper(provider.configuration.IPType) == utils.IPV4 {
