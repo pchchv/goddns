@@ -26,3 +26,14 @@ func TestLookupHost_ValidServer(t *testing.T) {
 		t.Error("google-public-dns-a.google.com should be resolved to 8.8.8.8")
 	}
 }
+
+func TestLookupHostIPv6_ValidServer(t *testing.T) {
+	t.Skip()
+	resolver := New([]string{"2001:4860:4860::8888", "2001:4860:4860::8844"})
+	if result, err := resolver.LookupHost("google-public-dns-a.google.com", dns.TypeAAAA); err != nil {
+		log.Println(err.Error())
+		t.Error("Should succeed dns lookup")
+	} else if result[0].String() != "2001:4860:4860::8888" {
+		t.Error("result should be: 2001:4860:4860::8888")
+	}
+}
