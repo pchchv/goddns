@@ -22,6 +22,10 @@ func (provider *DNSProvider) Init(conf *settings.Settings) {
 	provider.configuration = conf
 }
 
+func (provider *DNSProvider) UpdateIP(domainName, subdomainName, ip string) error {
+	return provider.updateIP(domainName, subdomainName, ip)
+}
+
 // updateIP update subdomain with current IP.
 func (provider *DNSProvider) updateIP(domain, subDomain, currentIP string) error {
 	client := utils.GetHTTPClient(provider.configuration)
