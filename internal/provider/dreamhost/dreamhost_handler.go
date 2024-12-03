@@ -24,6 +24,17 @@ func (provider *DNSProvider) Init(conf *settings.Settings) {
 	provider.configuration = conf
 }
 
+func (provider *DNSProvider) UpdateIP(domainName, subdomainName, ip string) error {
+	hostname := subdomainName + "." + domainName
+	lastIP, err := utils.ResolveDNS(hostname, provider.configuration.Resolver, provider.configuration.IPType)
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+
+	return provider.updateIP(hostname, ip, lastIP)
+}
+
 // updateDNS can add or remove DNS records.
 func (provider *DNSProvider) updateDNS(dns, ip, hostname, action string) error {
 	var ipType string
