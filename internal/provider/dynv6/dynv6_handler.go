@@ -22,6 +22,12 @@ func (provider *DNSProvider) Init(conf *settings.Settings) {
 	provider.configuration = conf
 }
 
+func (provider *DNSProvider) UpdateIP(domainName, subdomainName, ip string) error {
+	hostname := subdomainName + "." + domainName
+	client := utils.GetHTTPClient(provider.configuration)
+	return provider.update(client, hostname, ip)
+}
+
 func (provider *DNSProvider) update(client *http.Client, hostname string, currentIP string) error {
 	var ip string
 	if strings.ToUpper(provider.configuration.IPType) == utils.IPV4 {
