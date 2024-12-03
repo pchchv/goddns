@@ -48,6 +48,12 @@ func NewFromResolvConf(path string) (*DNSResolver, error) {
 	return &DNSResolver{servers, len(servers) * 2, rand.New(rand.NewSource(time.Now().UnixNano()))}, err
 }
 
+// LookupHost returns IP addresses of provided host.
+// In case of timeout retries query RetryTimes times.
+func (r *DNSResolver) LookupHost(host string, dnsType uint16) ([]net.IP, error) {
+	return r.lookupHost(host, dnsType, r.RetryTimes)
+}
+
 func (r *DNSResolver) lookupHost(host string, dnsType uint16, triesLeft int) (result []net.IP, err error) {
 	m1 := new(dns.Msg)
 	m1.Id = dns.Id()
