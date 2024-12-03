@@ -16,6 +16,13 @@ const URL = "https://api.dynu.com/nic/update?hostname=%s&password=%s&%s" // API 
 type DNSProvider struct {
 	configuration *settings.Settings
 }
+
+func (provider *DNSProvider) UpdateIP(domainName, subdomainName, ip string) error {
+	hostname := subdomainName + "." + domainName
+	client := utils.GetHTTPClient(provider.configuration)
+	return provider.update(client, hostname, subdomainName, ip)
+}
+
 func (provider *DNSProvider) update(client *http.Client, hostname, subdomain string, currentIP string) error {
 	var ip string
 	if strings.ToUpper(provider.configuration.IPType) == utils.IPV4 {
