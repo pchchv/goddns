@@ -43,11 +43,6 @@ func (provider *DNSProvider) updateIP(domain, subDomain, currentIP string) error
 		}
 	}(resp.Body)
 
-	if err != nil {
-		log.Fatal("Err:", err.Error())
-		return err
-	}
-
 	body, _ := io.ReadAll(resp.Body)
 	if resp.StatusCode != http.StatusOK {
 		log.Fatalf("Update IP failed: %s", string(body))
