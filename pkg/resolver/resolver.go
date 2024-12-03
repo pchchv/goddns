@@ -4,9 +4,11 @@ package resolver
 
 import (
 	"errors"
+	"fmt"
 	"math/rand"
 	"net"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/miekg/dns"
@@ -44,4 +46,56 @@ func NewFromResolvConf(path string) (*DNSResolver, error) {
 	}
 
 	return &DNSResolver{servers, len(servers) * 2, rand.New(rand.NewSource(time.Now().UnixNano()))}, err
+}
+
+func (r *DNSResolver) lookupHost(host string, dnsType uint16, triesLeft int) (result []net.IP, err error) {
+	m1 := new(dns.Msg)
+	m1.Id = dns.Id()
+	m1.RecursionDesired = true
+	m1.Question = make([]dns.Question, 1)
+	switch dnsType {
+	case dns.TypeA:
+		m1.Question[0] = dns.Question{Name: dns.Fqdn(host), Qtype: dns.TypeA, Qclass: dns.ClassINET}
+	case dns.TypeAAAA:
+		m1.Question[0] = dns.Question{Name: dns.Fqdn(host), Qtype: dns.TypeAAAA, Qclass: dns.ClassINET}
+	}
+
+	in, err := dns.Exchange(m1, r.Servers[r.r.Intn(len(r.Servers))])
+	if err != nil {
+		if strings.HasSuffix(err.Error(), "i/o timeout") && triesLeft > 0 {
+			triesLeft--
+			return r.lookupHost(host, dnsType, triesLeft)
+		}
+		return result, err
+	}
+
+	if in != nil && in.Rcode != dns.RcodeSuccess {
+		return result, errors.New(dns.RcodeToString[in.Rcode])
+	}
+
+	if dnsType == dns.TypeA {
+		if len(in.Answer) > 0 {
+			for _, record := range in.Answer {
+				if t, ok := record.(*dns.A); ok {
+					result = append(result, t.A)
+				}
+			}
+		} else {
+			return result, errors.New("empty result")
+		}
+	}
+
+	if dnsType == dns.TypeAAAA {
+		if len(in.Answer) > 0 {
+			for _, record := range in.Answer {
+				if t, ok := record.(*dns.AAAA); ok {
+					result = append(result, t.AAAA)
+				}
+			}
+		} else {
+			return result, fmt.Errorf("cannot resolve domain %s, please make sure the IP type is right", host)
+		}
+	}
+
+	return
 }
