@@ -17,6 +17,11 @@ type DNSProvider struct {
 	configuration *settings.Settings
 }
 
+// Init passes DNS settings and store it to provider instance.
+func (provider *DNSProvider) Init(conf *settings.Settings) {
+	provider.configuration = conf
+}
+
 func (provider *DNSProvider) UpdateIP(domainName, subdomainName, ip string) error {
 	hostname := subdomainName + "." + domainName
 	client := utils.GetHTTPClient(provider.configuration)
