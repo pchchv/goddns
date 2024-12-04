@@ -20,5 +20,6 @@ require (
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/miekg/dns v1.1.62
+	golang.org/x/oauth2 v0.24.0
 	golang.org/x/sys v0.27.0 // indirect
 )
