@@ -24,6 +24,11 @@ type zoneResponse struct {
 	Type string `json:"type"`
 }
 
+type recordListResponse struct {
+	zoneResponse
+	Records []recordResponse `json:"records"`
+}
+
 type DNSProvider struct {
 	configuration *settings.Settings
 	client        *http.Client
