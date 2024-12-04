@@ -119,3 +119,43 @@ func (provider *DNSProvider) getRecord(zoneID, recordName string) (id string, ip
 
 	return "", "", errors.New("record " + recordName + " not found")
 }
+
+func (provider *DNSProvider) putData(endpoint string, params map[string]any) (err error) {
+	var body []byte
+	if params != nil {
+		body, err = json.Marshal(params)
+		if err != nil {
+			return err
+		}
+	}
+
+	req, err := http.NewRequest(http.MethodPut, BaseURL+endpoint, bytes.NewReader(body))
+	if err != nil {
+		return err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+	req.Header.Add("X-API-Key", provider.configuration.LoginToken)
+	resp, err := provider.client.Do(req)
+	if err != nil {
+		return err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("failed to PUT %s, status: %s", endpoint, resp.Status)
+	}
+
+	defer resp.Body.Close()
+
+	return nil
+}
+
+func (provider *DNSProvider) updateRecord(zoneID, recordID, recordName, ip string) (err error) {
+	if err = provider.putData(fmt.Sprintf("zones/%s/records/%s", zoneID, recordID), map[string]any{"content": ip}); err != nil {
+		return errors.New("failed to update record " + recordName + ": " + err.Error())
+	}
+
+	log.Printf("Updated record %s to %s", recordName, ip)
+
+	return nil
+}
