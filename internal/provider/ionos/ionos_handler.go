@@ -48,6 +48,22 @@ func (provider *DNSProvider) Init(conf *settings.Settings) {
 	provider.client = utils.GetHTTPClient(provider.configuration)
 }
 
+func (provider *DNSProvider) UpdateIP(domainName, subdomainName, ip string) error {
+	zoneID, err := provider.getZoneID(domainName)
+	if err != nil {
+		return err
+	}
+
+	recordID, currIP, err := provider.getRecord(zoneID, subdomainName+"."+domainName)
+	if err != nil {
+		return err
+	} else if currIP == ip {
+		return nil
+	}
+
+	return provider.updateRecord(zoneID, recordID, subdomainName+"."+domainName, ip)
+}
+
 func (provider *DNSProvider) getData(endpoint string, params map[string]string) ([]byte, error) {
 	req, err := http.NewRequest(http.MethodGet, BaseURL+endpoint, nil)
 	if err != nil {
