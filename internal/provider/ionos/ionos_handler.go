@@ -92,3 +92,30 @@ func (provider *DNSProvider) getZoneID(domainName string) (string, error) {
 
 	return "", errors.New("zone " + domainName + " not found")
 }
+
+func (provider *DNSProvider) getRecord(zoneID, recordName string) (id string, ip string, err error) {
+	ipType := utils.IPTypeA
+	if provider.configuration.IPType == utils.IPV6 || provider.configuration.IPType == utils.IPTypeAAAA {
+		ipType = utils.IPTypeAAAA
+	}
+
+	body, err := provider.getData(fmt.Sprintf("zones/%s", zoneID),
+		map[string]string{
+			"recordName": recordName,
+			"recordType": ipType,
+		})
+	if err != nil {
+		return "", "", err
+	}
+
+	var rlp recordListResponse
+	if err = json.Unmarshal(body, &rlp); err != nil {
+		return "", "", err
+	}
+
+	if len(rlp.Records) > 0 {
+		return rlp.Records[0].ID, rlp.Records[0].Content, nil
+	}
+
+	return "", "", errors.New("record " + recordName + " not found")
+}
