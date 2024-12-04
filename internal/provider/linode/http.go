@@ -2,13 +2,40 @@ package linode
 
 import (
 	"context"
+	"errors"
 	"log"
 	"net"
 	"net/http"
+	"time"
 
+	"github.com/pchchv/goddns/internal/settings"
 	"golang.org/x/net/proxy"
 	"golang.org/x/oauth2"
 )
+
+func CreateHTTPClient(conf *settings.Settings) (*http.Client, error) {
+	var err error
+	transport := &http.Transport{}
+	if conf.UseProxy && conf.Socks5Proxy != "" {
+		transport, err = applyProxy(conf.Socks5Proxy, transport)
+		if err != nil {
+			log.Fatalf("Error connecting to proxy: '%s'", err)
+			log.Print("Continuing without proxy")
+		}
+	}
+
+	if conf.LoginToken == "" {
+		return nil, errors.New("LoginToken cannot be an empty string")
+	}
+
+	roundTripper := addBearerAuth(conf.LoginToken, transport)
+	httpClient := http.Client{
+		Timeout:   time.Second * 10,
+		Transport: roundTripper,
+	}
+
+	return &httpClient, nil
+}
 
 func addBearerAuth(accessToken string, transport http.RoundTripper) http.RoundTripper {
 	tokenSource := oauth2.StaticTokenSource(&oauth2.Token{AccessToken: accessToken})
