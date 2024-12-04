@@ -1,8 +1,10 @@
 package ionos
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 
@@ -99,7 +101,7 @@ func (provider *DNSProvider) getRecord(zoneID, recordName string) (id string, ip
 		ipType = utils.IPTypeAAAA
 	}
 
-	body, err := provider.getData(fmt.Sprintf("zones/%s", zoneID),
+	body, err := provider.getData("zones/"+zoneID,
 		map[string]string{
 			"recordName": recordName,
 			"recordType": ipType,
@@ -142,7 +144,7 @@ func (provider *DNSProvider) putData(endpoint string, params map[string]any) (er
 	}
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("failed to PUT %s, status: %s", endpoint, resp.Status)
+		return errors.New("failed to PUT " + endpoint + ", status: " + resp.Status)
 	}
 
 	defer resp.Body.Close()
