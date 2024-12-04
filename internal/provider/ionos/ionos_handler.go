@@ -7,6 +7,17 @@ import (
 	"github.com/pchchv/goddns/internal/utils"
 )
 
+type recordResponse struct {
+	ID       string `json:"id"`
+	Name     string `json:"name"`
+	RootName string `json:"rootName"`
+	Type     string `json:"type"`
+	Content  string `json:"content"`
+	TTL      int    `json:"ttl"`
+	Prio     int    `json:"prio"`
+	Disabled bool   `json:"disabled"`
+}
+
 type DNSProvider struct {
 	configuration *settings.Settings
 	client        *http.Client
