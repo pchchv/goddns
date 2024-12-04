@@ -1,6 +1,7 @@
 package hetzner
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"io"
@@ -121,4 +122,27 @@ func (provider *DNSProvider) getRecord(recordName string, zoneID string, Type st
 	}
 
 	return outRecord, errors.New("no record matching value and type found")
+}
+
+func (provider *DNSProvider) putData(endpoint string, location string, body []byte) error {
+	req, _ := http.NewRequest("PUT", BaseURL+endpoint+"/"+location, bytes.NewBuffer(body))
+	req.Header.Add("Auth-API-Token", provider.configuration.LoginToken)
+	req.Header.Add("Content-Type", "application/json")
+	resp, err := provider.client.Do(req)
+	if err != nil {
+		log.Fatal("Fetch failed")
+		return err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		log.Fatal("Got non 200 status code: ", resp.Status)
+		return errors.New("got non 200 status code " + resp.Status)
+	}
+
+	return nil
+}
+
+func (provider *DNSProvider) updateRecord(record Record) error {
+	recordJSON, _ := json.Marshal(record)
+	return provider.putData("records", record.ID, recordJSON)
 }
