@@ -34,6 +34,27 @@ func (provider *DNSProvider) Init(conf *settings.Settings) {
 	provider.client = utils.GetHTTPClient(provider.configuration)
 }
 
+func (provider *DNSProvider) UpdateIP(domainName, subdomainName, ip string) error {
+	zoneID, err := provider.getZoneID(domainName)
+	if err != nil {
+		log.Fatal("Failed to get ZoneID")
+		return err
+	}
+
+	record, err := provider.getRecord(subdomainName, zoneID, provider.configuration.IPType)
+	if err != nil {
+		log.Fatal("Failed to get Record")
+		return err
+	}
+
+	record.Value = ip
+	if err = provider.updateRecord(record); err != nil {
+		log.Fatal("Update of Record failed")
+	}
+
+	return err
+}
+
 func (provider *DNSProvider) getData(endpoint string, param string, value string) ([]byte, error) {
 	req, _ := http.NewRequest("GET", BaseURL+endpoint, nil)
 	q := req.URL.Query()
