@@ -18,6 +18,12 @@ type recordResponse struct {
 	Disabled bool   `json:"disabled"`
 }
 
+type zoneResponse struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+	Type string `json:"type"`
+}
+
 type DNSProvider struct {
 	configuration *settings.Settings
 	client        *http.Client
