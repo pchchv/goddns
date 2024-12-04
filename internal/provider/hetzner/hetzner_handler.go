@@ -2,6 +2,7 @@ package hetzner
 
 import (
 	"encoding/json"
+	"errors"
 	"io"
 	"log"
 	"net/http"
@@ -76,4 +77,48 @@ func (provider *DNSProvider) getZoneID(zoneName string) (string, error) {
 	}
 
 	return response.Zones[0].ID, nil
+}
+
+func (provider *DNSProvider) getRecord(recordName string, zoneID string, Type string) (Record, error) {
+	type GetRecordsResult struct {
+		Records []Record `json:"records"`
+	}
+
+	response := GetRecordsResult{}
+	respBody, err := provider.getData("records", "zone_id", zoneID)
+	if err != nil {
+		return Record{}, err
+	}
+
+	if err = json.Unmarshal(respBody, &response); err != nil {
+		return Record{}, err
+	}
+
+	if len(response.Records) == 0 {
+		log.Fatal("Zone doesn't have any records")
+		return Record{}, errors.New("zone doesn't have an records")
+	}
+
+	outRecord := Record{}
+	if Type == "IPv6" {
+		Type = utils.IPTypeAAAA
+	} else {
+		Type = utils.IPTypeA
+	}
+
+	found := false
+	for _, record := range response.Records {
+
+		if record.Name == recordName && record.Type == Type {
+			found = true
+			outRecord = record
+			break
+		}
+	}
+
+	if found {
+		return outRecord, nil
+	}
+
+	return outRecord, errors.New("no record matching value and type found")
 }
