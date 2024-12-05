@@ -21,3 +21,7 @@ type SetRecord struct {
 type DNSChange struct {
 	Set SetRecord `json:"set"`
 }
+
+type DNSUpdateRequest struct {
+	Changes []DNSChange `json:"changes"`
+}
