@@ -61,3 +61,24 @@ func (provider *DNSProvider) getDomainRecordID(domainID int, name string) (bool,
 
 	return false, 0, nil
 }
+
+func (provider *DNSProvider) createDomainRecord(domainID int, name string) (int, error) {
+	opts := &linodego.DomainRecordCreateOptions{
+		Type:   "A",
+		Name:   name,
+		Target: "127.0.0.1",
+		TTLSec: 30,
+	}
+	record, err := provider.linodeClient.CreateDomainRecord(context.Background(), domainID, *opts)
+	if err != nil {
+		return 0, err
+	}
+
+	return record.ID, nil
+}
+
+func (provider *DNSProvider) updateDomainRecord(domainID int, id int, ip string) error {
+	opts := &linodego.DomainRecordUpdateOptions{Target: ip}
+	_, err := provider.linodeClient.UpdateDomainRecord(context.Background(), domainID, id, *opts)
+	return err
+}
