@@ -1,6 +1,12 @@
 package scaleway
 
-import "github.com/pchchv/goddns/internal/settings"
+import (
+	"errors"
+	"strings"
+
+	"github.com/pchchv/goddns/internal/settings"
+	"github.com/pchchv/goddns/internal/utils"
+)
 
 // IDFields to filter DNS records for Scaleway API.
 type IDFields struct {
@@ -34,4 +40,14 @@ type DNSProvider struct {
 
 func (provider *DNSProvider) Init(conf *settings.Settings) {
 	provider.configuration = conf
+}
+
+func (provider *DNSProvider) getRecordType() (string, error) {
+	if strings.ToUpper(provider.configuration.IPType) == utils.IPV4 {
+		return utils.IPTypeA, nil
+	} else if strings.ToUpper(provider.configuration.IPType) == utils.IPV6 {
+		return utils.IPTypeAAAA, nil
+	}
+
+	return "", errors.New("must specify \"ip_type\" in config for Scaleway")
 }
