@@ -1,5 +1,7 @@
 package scaleway
 
+import "github.com/pchchv/goddns/internal/settings"
+
 // IDFields to filter DNS records for Scaleway API.
 type IDFields struct {
 	Name string `json:"name"`
@@ -24,4 +26,8 @@ type DNSChange struct {
 
 type DNSUpdateRequest struct {
 	Changes []DNSChange `json:"changes"`
+}
+
+type DNSProvider struct {
+	configuration *settings.Settings
 }
