@@ -7,6 +7,7 @@ import (
 
 	"github.com/linode/linodego"
 	"github.com/pchchv/goddns/internal/settings"
+	"github.com/pchchv/goddns/internal/utils"
 )
 
 type DNSProvider struct {
@@ -22,6 +23,26 @@ func (provider *DNSProvider) Init(conf *settings.Settings) {
 	linodeAPIClient := linodego.NewClient(httpClient)
 	linodeAPIClient.SetDebug(conf.DebugInfo)
 	provider.linodeClient = &linodeAPIClient
+}
+
+func (provider *DNSProvider) UpdateIP(domain, subdomain, ip string) error {
+	if subdomain == utils.RootDomain {
+		subdomain = ""
+	}
+
+	domainID, err := provider.getDomainID(domain)
+	if err != nil {
+		return err
+	}
+
+	recordExists, recordID, err := provider.getDomainRecordID(domainID, subdomain)
+	if err != nil {
+		return err
+	} else if !recordExists {
+		recordID, _ = provider.createDomainRecord(domainID, subdomain)
+	}
+
+	return provider.updateDomainRecord(domainID, recordID, ip)
 }
 
 func (provider *DNSProvider) getDomainID(name string) (int, error) {
