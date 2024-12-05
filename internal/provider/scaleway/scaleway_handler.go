@@ -31,3 +31,7 @@ type DNSUpdateRequest struct {
 type DNSProvider struct {
 	configuration *settings.Settings
 }
+
+func (provider *DNSProvider) Init(conf *settings.Settings) {
+	provider.configuration = conf
+}
