@@ -12,3 +12,8 @@ type Record struct {
 	TTL     int    `json:"ttl"`
 	Comment string `json:"comment"`
 }
+
+type SetRecord struct {
+	IDFields IDFields `json:"id_fields"`
+	Records  []Record `json:"records"`
+}
