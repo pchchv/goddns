@@ -1,6 +1,9 @@
 package ovh
 
-import "github.com/pchchv/goddns/internal/settings"
+import (
+	"github.com/pchchv/goddns/internal/settings"
+	"github.com/pchchv/goddns/internal/utils"
+)
 
 type Record struct {
 	Zone      string `json:"zone"`
@@ -17,4 +20,12 @@ type DNSProvider struct {
 
 func (provider *DNSProvider) Init(conf *settings.Settings) {
 	provider.configuration = conf
+}
+
+func (provider *DNSProvider) recordTypeToIPType(Type string) string {
+	if Type == utils.IPTypeAAAA {
+		return utils.IPV6
+	}
+
+	return utils.IPV4
 }
