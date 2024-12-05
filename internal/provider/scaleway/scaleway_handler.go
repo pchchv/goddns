@@ -50,6 +50,16 @@ func (provider *DNSProvider) Init(conf *settings.Settings) {
 	provider.configuration = conf
 }
 
+func (provider *DNSProvider) UpdateIP(domainName string, subdomainName string, ip string) error {
+	log.Printf("%s.%s - Start to update record IP...", subdomainName, domainName)
+	if err := provider.updateIP(domainName, subdomainName, ip); err != nil {
+		log.Fatal(err)
+		return err
+	}
+
+	return nil
+}
+
 func (provider *DNSProvider) getRecordType() (string, error) {
 	if strings.ToUpper(provider.configuration.IPType) == utils.IPV4 {
 		return utils.IPTypeA, nil
