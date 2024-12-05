@@ -44,3 +44,20 @@ func (provider *DNSProvider) getDomainID(name string) (int, error) {
 
 	return res[0].ID, nil
 }
+
+func (provider *DNSProvider) getDomainRecordID(domainID int, name string) (bool, int, error) {
+	res, err := provider.linodeClient.ListDomainRecords(context.Background(), domainID, nil)
+	if err != nil {
+		return false, 0, err
+	} else if len(res) == 0 {
+		return false, 0, nil
+	}
+
+	for _, record := range res {
+		if record.Name == name {
+			return true, record.ID, nil
+		}
+	}
+
+	return false, 0, nil
+}
