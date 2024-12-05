@@ -17,3 +17,7 @@ type SetRecord struct {
 	IDFields IDFields `json:"id_fields"`
 	Records  []Record `json:"records"`
 }
+
+type DNSChange struct {
+	Set SetRecord `json:"set"`
+}
