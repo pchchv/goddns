@@ -1,5 +1,7 @@
 package ovh
 
+import "github.com/pchchv/goddns/internal/settings"
+
 type Record struct {
 	Zone      string `json:"zone"`
 	TTL       int    `json:"ttl"`
@@ -7,4 +9,8 @@ type Record struct {
 	SubDomain string `json:"subDomain"`
 	Type      string `json:"fieldType"`
 	ID        int    `json:"id"`
+}
+
+type DNSProvider struct {
+	configuration *settings.Settings
 }
