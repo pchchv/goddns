@@ -15,6 +15,8 @@ require (
 	gopkg.in/yaml.v2 v2.4.0
 )
 
+require gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
+
 require (
 	github.com/go-resty/resty/v2 v2.15.3 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
@@ -25,5 +27,6 @@ require (
 	golang.org/x/sys v0.27.0 // indirect
 	golang.org/x/text v0.20.0 // indirect
 	golang.org/x/tools v0.22.0 // indirect
+	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 	gopkg.in/ini.v1 v1.67.0 // indirect
 )
