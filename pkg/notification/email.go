@@ -108,3 +108,7 @@ var mailTemplate = `
 type EmailNotification struct {
 	conf *settings.Settings
 }
+
+func NewEmailNotification(conf *settings.Settings) INotification {
+	return &EmailNotification{conf: conf}
+}
