@@ -1,6 +1,11 @@
 package notification
 
-import "github.com/pchchv/goddns/internal/settings"
+import (
+	"log"
+
+	"github.com/pchchv/goddns/internal/settings"
+	"gopkg.in/gomail.v2"
+)
 
 var mailTemplate = `
 <html>
@@ -111,4 +116,31 @@ type EmailNotification struct {
 
 func NewEmailNotification(conf *settings.Settings) INotification {
 	return &EmailNotification{conf: conf}
+}
+
+func (n *EmailNotification) Send(domain, currentIP string) error {
+	log.Println("Sending notification to: ", n.conf.Notify.Mail.SendTo)
+
+	m := gomail.NewMessage()
+	if n.conf.Notify.Mail.SendFrom != "" {
+		m.SetHeader("From", n.conf.Notify.Mail.SendFrom)
+	} else {
+		log.Println("'send_from' is not set, use 'smtp_username' instead")
+		m.SetHeader("From", n.conf.Notify.Mail.SMTPUsername)
+	}
+
+	m.SetHeader("To", n.conf.Notify.Mail.SendTo)
+	m.SetHeader("Subject", "GoDDNS Notification")
+	log.Println("currentIP:", currentIP)
+	log.Println("domain:", domain)
+	m.SetBody("text/html", buildTemplate(currentIP, domain, mailTemplate))
+
+	d := gomail.NewDialer(
+		n.conf.Notify.Mail.SMTPServer,
+		n.conf.Notify.Mail.SMTPPort,
+		n.conf.Notify.Mail.SMTPUsername,
+		n.conf.Notify.Mail.SMTPPassword)
+
+	// Send the email config by sendlist.
+	return d.DialAndSend(m)
 }
