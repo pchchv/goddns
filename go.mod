@@ -15,9 +15,14 @@ require (
 	gopkg.in/yaml.v2 v2.4.0
 )
 
-require gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
+require (
+	github.com/gorilla/websocket v1.4.2 // indirect
+	golang.org/x/crypto v0.29.0 // indirect
+	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
+)
 
 require (
+	github.com/bwmarrin/discordgo v0.28.1
 	github.com/go-resty/resty/v2 v2.15.3 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
