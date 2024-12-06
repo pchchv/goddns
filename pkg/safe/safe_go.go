@@ -1,6 +1,9 @@
 package safe
 
-import "errors"
+import (
+	"errors"
+	"log"
+)
 
 var ErrRecoverFromPanic = errors.New("recover from panic")
 
@@ -15,4 +18,13 @@ func Try(fn func()) (err error) {
 	}()
 	fn()
 	return nil
+}
+
+// SafeGo spawns a go-routine to run {#fn} with panic handler.
+func SafeGo(fn func()) {
+	go func() {
+		if err := Try(fn); err != nil {
+			log.Panicf("panic in go-routine: %s", err.Error())
+		}
+	}()
 }
