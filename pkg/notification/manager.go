@@ -2,6 +2,7 @@ package notification
 
 import (
 	"log"
+	"sync"
 
 	"github.com/pchchv/goddns/internal/settings"
 )
@@ -12,6 +13,11 @@ const (
 	Discord  = "discord"
 	Telegram = "telegram"
 	Pushover = "pushover"
+)
+
+var (
+	instance *notificationManager
+	once     sync.Once
 )
 
 type INotification interface {
@@ -32,6 +38,16 @@ func (n *notificationManager) Send(domain, currentIP string) {
 			log.Fatalf("Send notification with error: %e", err)
 		}
 	}
+}
+
+func GetNotificationManager(conf *settings.Settings) INotificationManager {
+	once.Do(func() {
+		instance = &notificationManager{
+			notifications: initNotifications(conf),
+		}
+	})
+
+	return instance
 }
 
 func initNotifications(conf *settings.Settings) map[string]INotification {
