@@ -247,6 +247,45 @@ func (helper *IPHelper) getIPFromInterface() (string, error) {
 	return "", errors.New("can't get a valid address from " + helper.configuration.IPInterface)
 }
 
+// getCurrentIP gets an IP from either internet or specific interface, depending on configuration.
+func (helper *IPHelper) getCurrentIP() {
+	var err error
+	var ip string
+	if helper.configuration.Mikrotik.Enabled {
+		if ip = helper.getIPFromMikrotik(); ip == "" {
+			log.Fatal("get ip from mikrotik failed. Fallback to get ip from onlinke if possible.")
+		} else {
+			helper.setCurrentIP(ip)
+			return
+		}
+	}
+
+	if len(helper.reqURLs) > 0 {
+		if ip = helper.getIPOnline(); ip == "" {
+			log.Fatal("get ip online failed. Fallback to get ip from interface if possible.")
+		} else {
+			helper.setCurrentIP(ip)
+			return
+		}
+	}
+
+	if helper.configuration.IPInterface != "" {
+		if ip, err = helper.getIPFromInterface(); err != nil {
+			log.Fatal("get ip from interface failed. There is no more ways to try.")
+		} else {
+			helper.setCurrentIP(ip)
+			return
+		}
+	}
+}
+
+func (helper *IPHelper) setCurrentIP(ip string) {
+	helper.mutex.Lock()
+	defer helper.mutex.Unlock()
+
+	helper.currentIP = ip
+}
+
 func isIPv4(ip string) bool {
 	return strings.Count(ip, ":") < 2
 }
