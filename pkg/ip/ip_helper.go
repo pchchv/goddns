@@ -12,6 +12,7 @@ import (
 	"path"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/pchchv/goddns/internal/settings"
@@ -114,6 +115,14 @@ func (helper *IPHelper) getIPFromMikrotik() string {
 
 	res := strings.Split(m[0]["address"], "/")
 	return res[0]
+}
+
+func (helper *IPHelper) getNext() string {
+	newIdx := atomic.AddInt64(&helper.idx, 1)
+	helper.mutex.RLock()
+	defer helper.mutex.RUnlock()
+	newIdx %= int64(len(helper.reqURLs))
+	return helper.reqURLs[newIdx]
 }
 
 func isIPv4(ip string) bool {
