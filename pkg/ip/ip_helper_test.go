@@ -25,3 +25,14 @@ func TestGetMikrotikIP(t *testing.T) {
 		t.Log("IP is:" + ip)
 	}
 }
+
+func TestGetCurrentIP(t *testing.T) {
+	t.Skip()
+	conf := &settings.Settings{IPUrls: []string{"https://myip.biturl.top"}}
+	helper := ip.GetIPHelperInstance(conf)
+	if ip := helper.GetCurrentIP(); ip == "" {
+		t.Log("IP is empty...")
+	} else {
+		t.Log("IP is:" + ip)
+	}
+}
