@@ -1,15 +1,19 @@
 package ip
 
 import (
+	"context"
 	"crypto/tls"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
+	"net"
 	"net/http"
 	"net/url"
 	"path"
+	"regexp"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -195,6 +199,52 @@ func (helper *IPHelper) getIPOnline() (onlineIP string) {
 	}
 
 	return
+}
+
+// getIPFromInterface gets IP address from the specific interface.
+func (helper *IPHelper) getIPFromInterface() (string, error) {
+	ifaces, err := net.InterfaceByName(helper.configuration.IPInterface)
+	if err != nil {
+		log.Fatal("Can't get network device "+helper.configuration.IPInterface+":", err)
+		return "", err
+	}
+
+	addrs, err := ifaces.Addrs()
+	if err != nil {
+		log.Fatal("Can't get address from "+helper.configuration.IPInterface+":", err)
+		return "", err
+	}
+
+	for _, addr := range addrs {
+		var ip net.IP
+		switch v := addr.(type) {
+		case *net.IPNet:
+			ip = v.IP
+		case *net.IPAddr:
+			ip = v.IP
+		}
+
+		if ip == nil {
+			continue
+		}
+
+		if ip.IsPrivate() {
+			continue
+		}
+
+		if isIPv4(ip.String()) && strings.ToUpper(helper.configuration.IPType) != utils.IPV4 {
+			continue
+		} else if strings.ToUpper(helper.configuration.IPType) != utils.IPV6 {
+			continue
+		}
+
+		if ip.String() != "" {
+			log.Printf("Get ip success from network interface by: %s, IP: %s", helper.configuration.IPInterface, ip.String())
+			return ip.String(), nil
+		}
+	}
+
+	return "", errors.New("can't get a valid address from " + helper.configuration.IPInterface)
 }
 
 func isIPv4(ip string) bool {
