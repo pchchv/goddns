@@ -115,3 +115,7 @@ func (helper *IPHelper) getIPFromMikrotik() string {
 	res := strings.Split(m[0]["address"], "/")
 	return res[0]
 }
+
+func isIPv4(ip string) bool {
+	return strings.Count(ip, ":") < 2
+}
