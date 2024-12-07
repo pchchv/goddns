@@ -21,6 +21,12 @@ import (
 
 	"github.com/pchchv/goddns/internal/settings"
 	"github.com/pchchv/goddns/internal/utils"
+	"github.com/pchchv/goddns/pkg/safe"
+)
+
+var (
+	helperInstance *IPHelper
+	helperOnce     sync.Once
 )
 
 type IPHelper struct {
@@ -77,6 +83,24 @@ func (helper *IPHelper) GetCurrentIP() string {
 	defer helper.mutex.RUnlock()
 
 	return helper.currentIP
+}
+
+func GetIPHelperInstance(conf *settings.Settings) *IPHelper {
+	helperOnce.Do(func() {
+		helperInstance = &IPHelper{
+			configuration: conf,
+			idx:           -1,
+		}
+
+		safe.SafeGo(func() {
+			for {
+				helperInstance.getCurrentIP()
+				time.Sleep(time.Second * time.Duration(conf.Interval))
+			}
+		})
+	})
+
+	return helperInstance
 }
 
 func (helper *IPHelper) getIPFromMikrotik() string {
