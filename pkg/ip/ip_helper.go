@@ -67,6 +67,18 @@ func (helper *IPHelper) UpdateConfiguration(conf *settings.Settings) {
 	log.Printf("Update ip helper configuration, urls: %v", helper.reqURLs)
 }
 
+func (helper *IPHelper) GetCurrentIP() string {
+	// first load
+	if helper.currentIP == "" {
+		helper.getCurrentIP()
+	}
+
+	helper.mutex.RLock()
+	defer helper.mutex.RUnlock()
+
+	return helper.currentIP
+}
+
 func (helper *IPHelper) getIPFromMikrotik() string {
 	u, err := url.Parse(helper.configuration.Mikrotik.Addr)
 	if err != nil {
