@@ -6,3 +6,10 @@ type Controller struct {
 	config     *settings.Settings
 	configPath string
 }
+
+func NewController(conf *settings.Settings, configPath string) *Controller {
+	return &Controller{
+		config:     conf,
+		configPath: configPath,
+	}
+}
