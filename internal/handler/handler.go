@@ -27,3 +27,11 @@ func (handler *Handler) SetConfiguration(conf *settings.Settings) {
 	handler.notificationManager = notification.GetNotificationManager(handler.Configuration)
 	handler.ipManager = ip.GetIPHelperInstance(handler.Configuration)
 }
+
+func (handler *Handler) SetProvider(provider provider.IDNSProvider) {
+	handler.dnsProvider = provider
+}
+
+func (handler *Handler) SetContext(ctx context.Context) {
+	handler.ctx = ctx
+}
