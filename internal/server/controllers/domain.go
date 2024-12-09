@@ -32,3 +32,19 @@ func (c *Controller) DeleteDomain(ctx fiber.Ctx) error {
 
 	return ctx.JSON(c.config.Domains)
 }
+
+func (c *Controller) AddDomain(ctx fiber.Ctx) error {
+	domain := settings.Domain{}
+	if err := ctx.Bind().Body(&domain); err != nil {
+		log.Fatalf("Failed to parse request body: %s", err.Error())
+		return ctx.Status(400).SendString(err.Error())
+	}
+
+	c.config.Domains = append(c.config.Domains, domain)
+	if err := c.config.SaveSettings(c.configPath); err != nil {
+		log.Fatalf("Failed to save settings: %s", err.Error())
+		return ctx.Status(500).SendString("Failed to save settings")
+	}
+
+	return ctx.JSON(c.config.Domains)
+}
