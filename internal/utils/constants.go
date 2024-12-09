@@ -1,5 +1,7 @@
 package utils
 
+import "time"
+
 const (
 	ALIDNS         = "AliDNS"
 	CLOUDFLARE     = "Cloudflare"
@@ -38,8 +40,10 @@ const (
 	RootDomain = "@"
 )
 
-// Version is current version of GoDNS.
-var Version = "v0.1"
+var (
+	StartTime = time.Now().Unix()
+	Version   = "v0.1" // current version of GoDDNS
+)
 
 type ProviderSetting struct {
 	Name        string `json:"name" yaml:"name"`

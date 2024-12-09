@@ -1,6 +1,13 @@
 package controllers
 
-import "github.com/pchchv/goddns/internal/settings"
+import (
+	"strings"
+
+	"github.com/gofiber/fiber/v3"
+	"github.com/pchchv/goddns/internal/settings"
+	"github.com/pchchv/goddns/internal/utils"
+	"github.com/pchchv/goddns/pkg/ip"
+)
 
 type BasicInfo struct {
 	Version      string            `json:"version"`
@@ -19,6 +26,19 @@ func (c *Controller) GetSubDomains() (count int) {
 		count += len(domain.SubDomains)
 	}
 	return
+}
+
+func (c *Controller) GetBasicInfo(ctx fiber.Ctx) error {
+	return ctx.JSON(BasicInfo{
+		Version:      utils.Version,
+		StartTime:    utils.StartTime,
+		DomainNum:    c.getDomains(),
+		SubDomainNum: c.GetSubDomains(),
+		Domains:      c.config.Domains,
+		PublicIP:     ip.GetIPHelperInstance(c.config).GetCurrentIP(),
+		IPMode:       strings.ToUpper(c.config.IPType),
+		Provider:     c.config.Provider,
+	})
 }
 
 func (c *Controller) getDomains() int {
