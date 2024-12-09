@@ -13,6 +13,14 @@ type BasicInfo struct {
 	Provider     string            `json:"provider"`
 }
 
+func (c *Controller) GetSubDomains() (count int) {
+	// get the total number of all the sub domains
+	for _, domain := range c.config.Domains {
+		count += len(domain.SubDomains)
+	}
+	return
+}
+
 func (c *Controller) getDomains() int {
 	// count the total number of domains
 	return len(c.config.Domains)
