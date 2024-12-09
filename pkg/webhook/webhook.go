@@ -47,6 +47,32 @@ func (w *Webhook) buildReqBody(domain, currentIP, ipType string) (string, error)
 	return tpl.String(), nil
 }
 
+func (w *Webhook) buildReqURL(domain, currentIP, ipType string) (string, error) {
+	t := template.New("req template")
+	if _, err := t.Parse(w.conf.Webhook.URL); err != nil {
+		log.Fatal("Failed to parse template:", err)
+		return "", err
+	}
+
+	data := struct {
+		CurrentIP string
+		Domain    string
+		IPType    string
+	}{
+		currentIP,
+		domain,
+		ipType,
+	}
+
+	var tpl bytes.Buffer
+	if err := t.Execute(&tpl, data); err != nil {
+		log.Fatal(err)
+		return "", err
+	}
+
+	return tpl.String(), nil
+}
+
 func GetWebhook(conf *settings.Settings) *Webhook {
 	once.Do(func() {
 		instance = &Webhook{
