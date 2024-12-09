@@ -47,6 +47,31 @@ func (handler *Handler) SetContext(ctx context.Context) {
 	handler.ctx = ctx
 }
 
+func (handler *Handler) UpdateIP(domain *settings.Domain) error {
+	ip := handler.ipManager.GetCurrentIP()
+	if ip == handler.cachedIP {
+		log.Printf("IP (%s) matches cached IP (%s), skipping", ip, handler.cachedIP)
+		return nil
+	} else if ip == "" {
+		if handler.Configuration.RunOnce {
+			return errors.New("fail to get current IP")
+		}
+		return nil
+	}
+
+	if err := handler.updateDNS(domain, ip); err != nil {
+		if handler.Configuration.RunOnce {
+			return errors.New(err.Error() + ": fail to update DNS")
+		}
+		log.Fatal(err)
+		return nil
+	}
+
+	handler.cachedIP = ip
+	log.Printf("Cached IP address: %s", ip)
+	return nil
+}
+
 func (handler *Handler) updateDNS(domain *settings.Domain, ip string) error {
 	var updatedDomains []string
 	for _, subdomainName := range domain.SubDomains {
