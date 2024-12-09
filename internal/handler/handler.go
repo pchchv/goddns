@@ -21,3 +21,9 @@ type Handler struct {
 func (handler *Handler) Init() {
 	handler.ipManager.UpdateConfiguration(handler.Configuration)
 }
+
+func (handler *Handler) SetConfiguration(conf *settings.Settings) {
+	handler.Configuration = conf
+	handler.notificationManager = notification.GetNotificationManager(handler.Configuration)
+	handler.ipManager = ip.GetIPHelperInstance(handler.Configuration)
+}
