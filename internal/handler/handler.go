@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	"github.com/pchchv/goddns/internal/provider"
 	"github.com/pchchv/goddns/internal/settings"
@@ -70,6 +71,31 @@ func (handler *Handler) UpdateIP(domain *settings.Domain) error {
 	handler.cachedIP = ip
 	log.Printf("Cached IP address: %s", ip)
 	return nil
+}
+
+func (handler *Handler) LoopUpdateIP(ctx context.Context, domain *settings.Domain) error {
+	ticker := time.NewTicker(time.Second * time.Duration(handler.Configuration.Interval))
+	// run once at the beginning
+	if err := handler.UpdateIP(domain); err != nil {
+		log.Fatalf("Error: %e. Update IP failed during the DNS Update loop", err)
+	}
+
+	log.Printf("DNS update loop finished, will run again in %d seconds", handler.Configuration.Interval)
+
+	for {
+		select {
+		case <-ticker.C:
+			err := handler.UpdateIP(domain)
+			if err != nil {
+				log.Fatalf("Error: %e. Update IP failed during the DNS Update loop", err)
+			}
+			log.Printf("DNS update loop finished, will run again in %d seconds", handler.Configuration.Interval)
+		case <-ctx.Done():
+			log.Print("DNS update loop cancelled")
+			ticker.Stop()
+			return nil
+		}
+	}
 }
 
 func (handler *Handler) updateDNS(domain *settings.Domain, ip string) error {
