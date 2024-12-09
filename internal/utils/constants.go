@@ -38,6 +38,9 @@ const (
 	RootDomain = "@"
 )
 
+// Version is current version of GoDNS.
+var Version = "v0.1"
+
 type ProviderSetting struct {
 	Name        string `json:"name" yaml:"name"`
 	Username    bool   `json:"username" yaml:"username"`
@@ -48,6 +51,3 @@ type ProviderSetting struct {
 	AppSecret   bool   `json:"app_secret" yaml:"app_secret"`
 	ConsumerKey bool   `json:"consumer_key" yaml:"consumer_key"`
 }
-
-// Version is current version of GoDNS.
-var Version = "v0.1"
