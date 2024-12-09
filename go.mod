@@ -16,7 +16,13 @@ require (
 )
 
 require (
+	github.com/andybalholm/brotli v1.1.0 // indirect
+	github.com/gofiber/utils/v2 v2.0.0-beta.4 // indirect
 	github.com/gorilla/websocket v1.4.2 // indirect
+	github.com/klauspost/compress v1.17.9 // indirect
+	github.com/valyala/bytebufferpool v1.0.0 // indirect
+	github.com/valyala/fasthttp v1.55.0 // indirect
+	github.com/valyala/tcplisten v1.0.0 // indirect
 	golang.org/x/crypto v0.29.0 // indirect
 	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 )
@@ -24,6 +30,7 @@ require (
 require (
 	github.com/bwmarrin/discordgo v0.28.1
 	github.com/go-resty/resty/v2 v2.15.3 // indirect
+	github.com/gofiber/fiber/v3 v3.0.0-beta.3
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/ovh/go-ovh v1.6.0
