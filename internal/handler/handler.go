@@ -17,3 +17,7 @@ type Handler struct {
 	ipManager           *ip.IPHelper
 	cachedIP            string
 }
+
+func (handler *Handler) Init() {
+	handler.ipManager.UpdateConfiguration(handler.Configuration)
+}
