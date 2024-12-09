@@ -12,3 +12,8 @@ type BasicInfo struct {
 	IPMode       string            `json:"ip_mode"`
 	Provider     string            `json:"provider"`
 }
+
+func (c *Controller) getDomains() int {
+	// count the total number of domains
+	return len(c.config.Domains)
+}
