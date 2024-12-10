@@ -1,8 +1,10 @@
 package server
 
 import (
+	"log"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/middleware/basicauth"
@@ -41,6 +43,17 @@ func (s *Server) SetAuthInfo(username, password string) *Server {
 	s.username = username
 	s.password = password
 	return s
+}
+
+func (s *Server) Start() error {
+	s.initRoutes()
+
+	log.Printf("Server is listening on port: %s", s.addr)
+	return s.app.Listen(s.addr)
+}
+
+func (s *Server) Stop() error {
+	return s.app.ShutdownWithTimeout(200 * time.Millisecond)
 }
 
 func (s *Server) initRoutes() {
