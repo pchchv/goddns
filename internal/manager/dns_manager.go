@@ -12,6 +12,7 @@ import (
 	"github.com/pchchv/goddns/internal/provider"
 	"github.com/pchchv/goddns/internal/server"
 	"github.com/pchchv/goddns/internal/settings"
+	"github.com/pchchv/goddns/internal/utils"
 )
 
 var managerInstance *DNSManager
@@ -139,6 +140,57 @@ func (manager *DNSManager) initManager() error {
 		managerInstance.startServer()
 	}
 	return nil
+}
+
+func (manager *DNSManager) startMonitor() {
+	// start listening for events
+	go func() {
+		for {
+			select {
+			case <-manager.ctx.Done():
+				log.Println("Shutting down the old file watcher and the internal HTTP server...")
+				return
+			case event, ok := <-manager.watcher.Events:
+				if !ok {
+					return
+				}
+				if event.Has(fsnotify.Write) {
+					log.Println("modified file:", event.Name)
+					log.Println("Reloading configuration...")
+					// reload the configuration
+					// read the file and update the configuration
+					configFile := getFileName(manager.configPath)
+					if event.Name == configFile {
+						// Load settings from configs file
+						newConfig := &settings.Settings{}
+						if err := settings.LoadSettings(manager.configPath, newConfig); err != nil {
+							log.Fatalf("Failed to reload configuration: %s", err)
+							continue
+						}
+
+						// validate the new configuration
+						if err := utils.CheckSettings(newConfig); err != nil {
+							log.Fatalf("Failed to validate the new configuration: %s", err)
+							continue
+						}
+
+						manager.config = newConfig
+						manager.Restart()
+					}
+				}
+			case err, ok := <-manager.watcher.Errors:
+				if !ok {
+					return
+				}
+				log.Println("error:", err)
+			}
+		}
+	}()
+
+	// add path
+	if err := manager.watcher.Add(manager.configPath); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func getFileName(configPath string) string {
