@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/fsnotify/fsnotify"
@@ -138,4 +139,10 @@ func (manager *DNSManager) initManager() error {
 		managerInstance.startServer()
 	}
 	return nil
+}
+
+func getFileName(configPath string) string {
+	// get the file name from the path
+	// e.g. /etc/goddns/config.json -> config.json
+	return filepath.Base(configPath)
 }
