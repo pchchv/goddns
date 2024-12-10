@@ -36,3 +36,64 @@ func (s *Server) SetAuthInfo(username, password string) *Server {
 	s.password = password
 	return s
 }
+
+func (s *Server) initRoutes() {
+	// set cross domain access rules
+	s.app.Use(cors.New(cors.Config{
+		AllowOrigins: []string{"*"},
+		AllowMethods: []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders: []string{"Accept", "Content-Type", "Content-Length", "Accept-Encoding", "X-CSRF-Token", "Authorization"},
+	}))
+
+	// middleware to rewrite paths for HTML files
+	s.app.Use(func(c fiber.Ctx) error {
+		// check if the request is for the API
+		if strings.Contains(c.Path(), "/api/v1") {
+			return c.Next()
+		} else if c.Path() == "/" {
+			c.Path("index.html")
+			return c.Next()
+		} else if strings.Contains(c.Path(), ".") {
+			// check if the request is for the other resources
+			return c.Next()
+		}
+
+		// rewrite request to append `.html`
+		c.Path(c.Path() + ".html")
+		return c.Next()
+	})
+
+	// create routes group.
+	route := s.app.Group("/api/v1")
+	route.Use(basicauth.New(basicauth.Config{
+		Users: map[string]string{
+			s.username: s.password,
+		},
+	}))
+
+	// register routes
+	route.Get("/auth", s.controller.Auth)
+
+	// get basic info
+	route.Get("/info", s.controller.GetBasicInfo)
+
+	// domain related routes
+	route.Get("/domains", s.controller.GetDomains)
+	route.Post("/domains", s.controller.AddDomain)
+	route.Delete("/domains/:name", s.controller.DeleteDomain)
+
+	// provider related routes
+	route.Get("/provider", s.controller.GetProvider)
+	route.Get("/provider/settings", s.controller.GetProviderSettings)
+	route.Put("/provider", s.controller.UpdateProvider)
+
+	// network related routes
+	route.Get("/network", s.controller.GetNetworkSettings)
+	route.Put("/network", s.controller.UpdateNetworkSettings)
+
+	// serve embedded files
+	s.app.Use("/", static.New("", static.Config{
+		FS:     os.DirFS("out"),
+		Browse: true,
+	}))
+}
