@@ -29,6 +29,7 @@ require (
 
 require (
 	github.com/bwmarrin/discordgo v0.28.1
+	github.com/fsnotify/fsnotify v1.8.0
 	github.com/go-resty/resty/v2 v2.15.3 // indirect
 	github.com/gofiber/fiber/v3 v3.0.0-beta.3
 	github.com/mattn/go-colorable v0.1.13 // indirect
