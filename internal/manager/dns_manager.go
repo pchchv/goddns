@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"os"
+	"time"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/pchchv/goddns/internal/handler"
@@ -60,6 +61,22 @@ func (manager *DNSManager) Stop() {
 	if manager.server != nil {
 		manager.server.Stop()
 	}
+}
+
+func (manager *DNSManager) Restart() {
+	log.Println("Restarting DNS manager...")
+	manager.Stop()
+
+	// wait for the goroutines to exit
+	time.Sleep(200 * time.Millisecond)
+
+	// re-init the manager
+	if err := manager.initManager(); err != nil {
+		log.Fatalf("Error during DNS manager restarting: %s", err)
+	}
+
+	manager.Run()
+	log.Println("DNS manager restarted successfully")
 }
 
 func (manager *DNSManager) startServer() {
