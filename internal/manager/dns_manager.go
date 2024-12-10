@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"sync"
 	"time"
 
 	"github.com/fsnotify/fsnotify"
@@ -15,7 +16,10 @@ import (
 	"github.com/pchchv/goddns/internal/utils"
 )
 
-var managerInstance *DNSManager
+var (
+	managerOnce     sync.Once
+	managerInstance *DNSManager
+)
 
 type DNSManager struct {
 	config      *settings.Settings
@@ -27,6 +31,20 @@ type DNSManager struct {
 	server      *server.Server
 	configPath  string
 	defaultAddr string
+}
+
+func GetDNSManager(cfgPath string, conf *settings.Settings, defaultAddr string) *DNSManager {
+	managerOnce.Do(func() {
+		managerInstance = &DNSManager{}
+		managerInstance.configPath = cfgPath
+		managerInstance.config = conf
+		managerInstance.defaultAddr = defaultAddr
+		if err := managerInstance.initManager(); err != nil {
+			log.Fatalf("Error during DNS manager initialization: %s", err)
+		}
+	})
+
+	return managerInstance
 }
 
 func (manager *DNSManager) Run() {
