@@ -3,6 +3,7 @@ package manager
 import (
 	"context"
 	"log"
+	"os"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/pchchv/goddns/internal/handler"
@@ -23,6 +24,29 @@ type DNSManager struct {
 	server      *server.Server
 	configPath  string
 	defaultAddr string
+}
+
+func (manager *DNSManager) Run() {
+	if len(manager.config.Domains) == 0 {
+		log.Println("No domain is configured, please check your configuration file")
+		return
+	}
+
+	for _, domain := range manager.config.Domains {
+		if manager.config.RunOnce {
+			if err := manager.handler.UpdateIP(&domain); err != nil {
+				log.Fatal("Error during execution:", err)
+				os.Exit(1)
+			}
+		} else {
+			// pass the context to the goroutine
+			go manager.handler.LoopUpdateIP(manager.ctx, &domain)
+		}
+	}
+
+	if manager.config.RunOnce {
+		os.Exit(0)
+	}
 }
 
 func (manager *DNSManager) startServer() {
