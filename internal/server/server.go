@@ -25,3 +25,14 @@ func (s *Server) SetConfigPath(configPath string) *Server {
 	s.configPath = configPath
 	return s
 }
+
+func (s *Server) SetAddress(addr string) *Server {
+	s.addr = addr
+	return s
+}
+
+func (s *Server) SetAuthInfo(username, password string) *Server {
+	s.username = username
+	s.password = password
+	return s
+}
