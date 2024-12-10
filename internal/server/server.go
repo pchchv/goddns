@@ -56,6 +56,12 @@ func (s *Server) Stop() error {
 	return s.app.ShutdownWithTimeout(200 * time.Millisecond)
 }
 
+func (s *Server) Build() {
+	config := fiber.Config{}
+	s.app = fiber.New(config)
+	s.controller = controllers.NewController(s.config, s.configPath)
+}
+
 func (s *Server) initRoutes() {
 	// set cross domain access rules
 	s.app.Use(cors.New(cors.Config{
