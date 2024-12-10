@@ -1,6 +1,9 @@
 package controllers
 
-import "github.com/pchchv/goddns/internal/settings"
+import (
+	"github.com/gofiber/fiber/v3"
+	"github.com/pchchv/goddns/internal/settings"
+)
 
 type NetworkSettings struct {
 	IPMode        string           `json:"ip_mode"`
@@ -12,4 +15,20 @@ type NetworkSettings struct {
 	Webhook       settings.Webhook `json:"webhook,omitempty"`
 	Resolver      string           `json:"resolver"`
 	IPInterface   string           `json:"ip_interface"`
+}
+
+func (c *Controller) GetNetworkSettings(ctx fiber.Ctx) error {
+	settings := NetworkSettings{
+		IPMode:        c.config.IPType,
+		IPUrls:        c.config.IPUrls,
+		IPV6Urls:      c.config.IPV6Urls,
+		UseProxy:      c.config.UseProxy,
+		SkipSSLVerify: c.config.SkipSSLVerify,
+		Socks5Proxy:   c.config.Socks5Proxy,
+		Webhook:       c.config.Webhook,
+		Resolver:      c.config.Resolver,
+		IPInterface:   c.config.IPInterface,
+	}
+
+	return ctx.JSON(settings)
 }
