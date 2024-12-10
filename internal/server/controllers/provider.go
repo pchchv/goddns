@@ -1,6 +1,8 @@
 package controllers
 
 import (
+	"log"
+
 	"github.com/gofiber/fiber/v3"
 	"github.com/pchchv/goddns/internal/utils"
 )
@@ -30,4 +32,26 @@ func (c *Controller) GetProvider(ctx fiber.Ctx) error {
 
 func (c *Controller) GetProviderSettings(ctx fiber.Ctx) error {
 	return ctx.JSON(utils.Providers)
+}
+
+func (c *Controller) UpdateProvider(ctx fiber.Ctx) error {
+	var provider Provider
+	if err := ctx.Bind().Body(&provider); err != nil {
+		return err
+	}
+
+	c.config.Provider = provider.Provider
+	c.config.Email = provider.Email
+	c.config.Password = provider.Password
+	c.config.LoginToken = provider.LoginToken
+	c.config.AppKey = provider.AppKey
+	c.config.AppSecret = provider.AppSecret
+	c.config.ConsumerKey = provider.ConsumerKey
+
+	if err := c.config.SaveSettings(c.configPath); err != nil {
+		log.Fatalf("Failed to save settings: %s", err.Error())
+		return ctx.Status(500).SendString("Failed to save settings")
+	}
+
+	return ctx.SendStatus(fiber.StatusOK)
 }
