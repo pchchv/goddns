@@ -1,7 +1,13 @@
 package server
 
 import (
+	"os"
+	"strings"
+
 	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v3/middleware/basicauth"
+	"github.com/gofiber/fiber/v3/middleware/cors"
+	"github.com/gofiber/fiber/v3/middleware/static"
 	"github.com/pchchv/goddns/internal/server/controllers"
 	"github.com/pchchv/goddns/internal/settings"
 )
