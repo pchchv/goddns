@@ -11,6 +11,8 @@ import (
 	"github.com/pchchv/goddns/internal/settings"
 )
 
+var managerInstance *DNSManager
+
 type DNSManager struct {
 	config      *settings.Settings
 	handler     *handler.Handler
@@ -48,4 +50,38 @@ func (manager *DNSManager) startServer() {
 	} else {
 		log.Println("Web panel is disabled")
 	}
+}
+
+func (manager *DNSManager) initManager() error {
+	log.Printf("Creating DNS handler with provider: %s", manager.config.Provider)
+	dnsProvider, err := provider.GetProvider(manager.config)
+	if err != nil {
+		return err
+	}
+
+	ctx, cancel := context.WithCancel(context.Background())
+	manager.ctx = ctx
+	manager.cancel = cancel
+	manager.provider = dnsProvider
+	manager.handler = &handler.Handler{}
+	manager.handler.SetContext(manager.ctx)
+	manager.handler.SetConfiguration(manager.config)
+	manager.handler.SetProvider(manager.provider)
+	manager.handler.Init()
+
+	// if RunOnce is true, we don't need to create a file watcher and start the internal HTTP server
+	if !manager.config.RunOnce {
+		// create a new file watcher
+		log.Println("Creating the new file watcher...")
+		managerInstance.watcher, err = fsnotify.NewWatcher()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		// monitor the configuration file changes
+		managerInstance.startMonitor()
+		// start the internal HTTP server
+		managerInstance.startServer()
+	}
+	return nil
 }
