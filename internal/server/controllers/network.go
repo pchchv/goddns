@@ -1,8 +1,11 @@
 package controllers
 
 import (
+	"log"
+
 	"github.com/gofiber/fiber/v3"
 	"github.com/pchchv/goddns/internal/settings"
+	"github.com/pchchv/goddns/internal/utils"
 )
 
 type NetworkSettings struct {
@@ -28,6 +31,43 @@ func (c *Controller) GetNetworkSettings(ctx fiber.Ctx) error {
 		Webhook:       c.config.Webhook,
 		Resolver:      c.config.Resolver,
 		IPInterface:   c.config.IPInterface,
+	}
+
+	return ctx.JSON(settings)
+}
+
+func (c *Controller) UpdateNetworkSettings(ctx fiber.Ctx) error {
+	var settings NetworkSettings
+	if err := ctx.Bind().Body(&settings); err != nil {
+		log.Fatalf("Failed to parse request body: %s", err.Error())
+		return ctx.Status(400).SendString(err.Error())
+	}
+
+	if settings.IPMode == utils.IPV4 && len(settings.IPUrls) == 0 {
+		return ctx.Status(400).SendString("IP URLs cannot be empty")
+	}
+
+	if settings.IPMode == utils.IPV6 && len(settings.IPV6Urls) == 0 {
+		return ctx.Status(400).SendString("IPv6 URLs cannot be empty")
+	}
+
+	c.config.IPType = settings.IPMode
+	if settings.IPMode == utils.IPV6 {
+		c.config.IPV6Urls = settings.IPV6Urls
+	} else {
+		c.config.IPUrls = settings.IPUrls
+	}
+
+	c.config.UseProxy = settings.UseProxy
+	c.config.SkipSSLVerify = settings.SkipSSLVerify
+	c.config.Socks5Proxy = settings.Socks5Proxy
+	c.config.Webhook = settings.Webhook
+	c.config.Resolver = settings.Resolver
+	c.config.IPInterface = settings.IPInterface
+
+	if err := c.config.SaveSettings(c.configPath); err != nil {
+		log.Fatalf("Failed to save settings: %s", err.Error())
+		return ctx.Status(500).SendString("Failed to save network settings")
 	}
 
 	return ctx.JSON(settings)
