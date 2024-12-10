@@ -15,3 +15,13 @@ type Server struct {
 	config     *settings.Settings
 	configPath string
 }
+
+func (s *Server) SetConfig(config *settings.Settings) *Server {
+	s.config = config
+	return s
+}
+
+func (s *Server) SetConfigPath(configPath string) *Server {
+	s.configPath = configPath
+	return s
+}
