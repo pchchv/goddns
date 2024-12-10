@@ -49,6 +49,19 @@ func (manager *DNSManager) Run() {
 	}
 }
 
+func (manager *DNSManager) Stop() {
+	manager.cancel()
+	// close the file watcher
+	if manager.watcher != nil {
+		manager.watcher.Close()
+	}
+
+	// stop the internal HTTP server
+	if manager.server != nil {
+		manager.server.Stop()
+	}
+}
+
 func (manager *DNSManager) startServer() {
 	// start the internal HTTP server
 	if (manager.config.WebPanel.Addr != "" || manager.defaultAddr != ":9000") && manager.config.WebPanel.Enabled {
