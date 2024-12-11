@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/fatih/color"
+	"github.com/pchchv/goddns/internal/manager"
 	"github.com/pchchv/goddns/internal/settings"
 	"github.com/pchchv/goddns/internal/utils"
 )
@@ -17,6 +18,7 @@ var (
 	Version = "v0.1" // current version of GoDDNS
 	optHelp = flag.Bool("h", false, "Show help")
 	optConf = flag.String("c", "./config.json", "Specify a config file")
+	optAddr = flag.String("a", ":9000", "Specify the address to listen on")
 )
 
 func main() {
@@ -44,4 +46,7 @@ func main() {
 	if err := utils.CheckSettings(&config); err != nil {
 		log.Fatal("Invalid settings: ", err.Error())
 	}
+
+	// Create DNS manager
+	dnsManager := manager.GetDNSManager(configPath, &config, *optAddr)
 }
