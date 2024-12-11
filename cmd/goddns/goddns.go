@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/fatih/color"
 	"github.com/pchchv/goddns/internal/manager"
@@ -59,4 +60,13 @@ func main() {
 	// handle the signals
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
+
+	// stop the DNS manager
+	<-c
+	log.Println("GoDDNS is terminated, stopping the DNS manager...")
+	dnsManager.Stop()
+
+	// wait for the goroutines to exit
+	time.Sleep(200 * time.Millisecond)
+	log.Println("GoDDNS is stopped, bye!")
 }
