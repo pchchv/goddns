@@ -49,4 +49,8 @@ func main() {
 
 	// Create DNS manager
 	dnsManager := manager.GetDNSManager(configPath, &config, *optAddr)
+
+	// Run DNS manager
+	log.Println("GoDDNS started, starting the DNS manager...")
+	dnsManager.Run()
 }
