@@ -4,6 +4,8 @@ import (
 	"flag"
 	"log"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/fatih/color"
 	"github.com/pchchv/goddns/internal/manager"
@@ -53,4 +55,8 @@ func main() {
 	// Run DNS manager
 	log.Println("GoDDNS started, starting the DNS manager...")
 	dnsManager.Run()
+
+	// handle the signals
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 }
